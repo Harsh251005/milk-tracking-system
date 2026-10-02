@@ -16,17 +16,21 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: color ?? context.colors.card,
+    // A Material (not a decorated box) so taps on rows inside the card show
+    // their ripple on the card instead of underneath it.
+    return Material(
+      color: color ?? context.colors.card,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
+        side: BorderSide(
           color: color == null ? context.colors.border : Colors.transparent,
         ),
       ),
-      child: child,
+      child: Padding(
+        padding: padding,
+        child: SizedBox(width: double.infinity, child: child),
+      ),
     );
   }
 }
