@@ -125,4 +125,47 @@ void main() {
     final entries = await repo.watchMonth((year: 2026, month: 10)).first;
     expect(entries.where((e) => e.date == today), isEmpty);
   });
+
+  testWidgets('a new day while the app stays open starts a fresh log', (
+    tester,
+  ) async {
+    usePhoneScreen(tester);
+    repo = MemoryMilkRepository.sample(today: today);
+    final container = ProviderContainer(
+      overrides: [
+        milkRepositoryProvider.overrideWithValue(repo),
+        todayProvider.overrideWith((ref) => ref.watch(_testDay)),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: buildTheme(),
+          home: Scaffold(body: TodayScreen(onOpenMonth: () {})),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Got 1 L'));
+    await tester.pumpAndSettle();
+    expect(find.text('1 L received'), findsOneWidget);
+
+    container.read(_testDay.notifier).set(DateTime(2026, 10, 3));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Saturday'), findsOneWidget);
+    expect(find.text('Got 1 L'), findsOneWidget);
+    expect(find.text('1 L received'), findsNothing);
+  });
 }
+
+class _TestDay extends Notifier<DateTime> {
+  @override
+  DateTime build() => DateTime(2026, 10, 2);
+
+  void set(DateTime day) => state = day;
+}
+
+final _testDay = NotifierProvider<_TestDay, DateTime>(_TestDay.new);

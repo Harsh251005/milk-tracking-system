@@ -29,6 +29,8 @@ class TodayScreen extends ConsumerWidget {
       builder: (household) => AsyncView(
         value: ref.watch(monthEntriesProvider(monthOf(today))),
         builder: (entries) => _TodayBody(
+          // A new day starts a fresh editor (usual quantity, saved price).
+          key: ValueKey(today),
           household: household,
           entries: entries,
           today: today,
@@ -41,6 +43,7 @@ class TodayScreen extends ConsumerWidget {
 
 class _TodayBody extends ConsumerStatefulWidget {
   const _TodayBody({
+    super.key,
     required this.household,
     required this.entries,
     required this.today,

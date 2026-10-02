@@ -8,6 +8,7 @@ import '../data/firebase/firestore_milk_repository.dart';
 import '../data/milk_repository.dart';
 import '../domain/dates.dart';
 import '../domain/models.dart';
+import 'clock.dart';
 
 // --- Session: who is this phone, and which household is it in? ------------
 
@@ -43,9 +44,11 @@ final milkRepositoryProvider = Provider<MilkRepository>(
   ),
 );
 
-/// Read once per app start; good enough until the app runs past midnight,
-/// which M7's reminder work will handle.
-final todayProvider = Provider<DateTime>((ref) => dateOnly(DateTime.now()));
+/// Today's date, kept current across midnight and app resumes.
+/// Tests override this with a fixed day.
+final todayProvider = Provider<DateTime>(
+  (ref) => ref.watch(currentDayProvider),
+);
 
 final householdProvider = StreamProvider<Household>(
   (ref) => ref.watch(milkRepositoryProvider).watchHousehold(),

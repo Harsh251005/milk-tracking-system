@@ -8,9 +8,10 @@ Two phones in one household stay in sync.
 distribution via GitHub Releases — no Play Store.
 
 ## Status
-M2 — first-run setup and live data in Firestore. Each phone signs in
-anonymously (no login screen); data syncs and works offline. Pairing a second
-phone into the same household arrives in M5.
+M3 — daily logging verified offline. Each phone signs in anonymously (no
+login screen). Logs made in airplane mode survive an app restart and sync to
+the server within seconds of reconnecting. Pairing a second phone into the
+same household arrives in M5.
 
 ## What it does today
 - **Today:** usual quantity prefilled; one tap logs "Got 1 L" or "No milk today".
@@ -26,6 +27,8 @@ phone into the same household arrives in M5.
   usual quantity), and the milkman's WhatsApp number (skippable).
 - **Settings:** edit milk type, price and usual quantity; add or remove milk
   types; edit the milkman; change your display name.
+- **Always today:** the date refreshes at midnight and when the app returns
+  from the background, so an app left open overnight never logs to yesterday.
 - **Errors are loud:** a save the server rejects shows a red banner with the
   reason; it never fails silently.
 
