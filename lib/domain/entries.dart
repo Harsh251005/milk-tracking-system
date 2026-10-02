@@ -1,13 +1,15 @@
 import 'dates.dart';
 import 'models.dart';
 
-/// "Got milk" for [date], snapshotting today's rates. Zero quantities are dropped.
+/// "Got milk" for [date]. Each product is billed at [ratesPaise] when given,
+/// else its saved rate. Zero quantities are dropped.
 DayEntry gotEntry({
   required DateTime date,
   required Household household,
   required Map<String, int> quantitiesMl,
   required String byUid,
   required DateTime now,
+  Map<String, int> ratesPaise = const {},
 }) {
   final quantities = {
     for (final e in quantitiesMl.entries)
@@ -19,7 +21,7 @@ DayEntry gotEntry({
     quantitiesMl: quantities,
     ratesPaise: {
       for (final p in household.products)
-        if (quantities.containsKey(p.id)) p.id: p.ratePaise,
+        if (quantities.containsKey(p.id)) p.id: ratesPaise[p.id] ?? p.ratePaise,
     },
     byUid: byUid,
     at: now,
@@ -49,3 +51,9 @@ Map<String, int> initialQuantities(Household household, DayEntry? existing) {
   }
   return {for (final p in household.products) p.id: p.usualMl};
 }
+
+/// Prices the editor starts with: the existing entry's, else the saved ones.
+Map<String, int> initialRates(Household household, DayEntry? existing) => {
+  for (final p in household.products)
+    p.id: existing?.ratesPaise[p.id] ?? p.ratePaise,
+};

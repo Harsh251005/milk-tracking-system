@@ -22,4 +22,15 @@ void main() {
     expect(formatRupees(12345600), '₹1,23,456');
     expect(formatRupees(6850), '₹68.50');
   });
+
+  test('typed prices parse to paise', () {
+    expect(parseRupees('72'), 7200);
+    expect(parseRupees('72.5'), 7250);
+    expect(parseRupees(' ₹ 72.50 '), 7250);
+    expect(parseRupees('1,200'), 120000);
+    expect(parseRupees('0'), isNull);
+    expect(parseRupees('72.555'), isNull);
+    expect(parseRupees('abc'), isNull);
+    expect(parseRupees(''), isNull);
+  });
 }

@@ -30,3 +30,14 @@ final _rupeesPaise = NumberFormat.currency(
 String formatRupees(int paise) => paise % 100 == 0
     ? _rupeesWhole.format(paise ~/ 100)
     : _rupeesPaise.format(paise / 100);
+
+/// Parses what someone types as a price: "72", "72.5", "₹ 72.50".
+/// Returns paise, or null if it isn't a positive amount with at most 2 decimals.
+int? parseRupees(String input) {
+  final s = input.replaceAll(RegExp(r'[₹,\s]'), '');
+  final m = RegExp(r'^(\d{1,6})(?:\.(\d{0,2}))?$').firstMatch(s);
+  if (m == null) return null;
+  final paise =
+      int.parse(m[1]!) * 100 + int.parse((m[2] ?? '').padRight(2, '0'));
+  return paise > 0 ? paise : null;
+}
