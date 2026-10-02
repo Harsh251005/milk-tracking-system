@@ -209,6 +209,8 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Update available · version 1.0.1'), findsOneWidget);
+    expect(find.textContaining('Package installer'), findsOneWidget);
+    expect(find.textContaining('Allow from this source'), findsOneWidget);
   });
 
   testWidgets('Update downloads in the app; a failure says why', (
@@ -244,6 +246,11 @@ void main() {
     await tester.tap(find.text('Try again'));
     await tester.pumpAndSettle();
     expect(updates.installs, 1);
+    // Back from Android's screen without finishing: guide them.
+    expect(find.textContaining("Didn't finish?"), findsOneWidget);
+    await tester.tap(find.text('Update again'));
+    await tester.pumpAndSettle();
+    expect(updates.installs, 2);
   });
 
   testWidgets('no banner when up to date', (tester) async {

@@ -72,7 +72,31 @@ class GitHubUpdates implements Updates {
     AppRelease release, {
     required void Function(double progress) onProgress,
   }) async {
-    final file = File('${(await getTemporaryDirectory()).path}/update.apk');
+    // Kept until the next version, so tapping Update again (e.g. after
+    // allowing installs) reopens the installer without re-downloading.
+    final dir = (await getTemporaryDirectory()).path;
+    final file = File('$dir/update-${release.version}.apk');
+    if (!await file.exists()) {
+      await _download(release, File('${file.path}.part'), onProgress);
+      await File('${file.path}.part').rename(file.path);
+    }
+    onProgress(1);
+    // Android asks once to "allow installs from Milk Tracker", then shows
+    // its Update screen. Data is kept: same app, same signing key.
+    final opened = await OpenFilex.open(
+      file.path,
+      type: 'application/vnd.android.package-archive',
+    );
+    if (opened.type != ResultType.done) {
+      throw UpdateException("Couldn't open the installer (${opened.message}).");
+    }
+  }
+
+  Future<void> _download(
+    AppRelease release,
+    File part,
+    void Function(double progress) onProgress,
+  ) async {
     final client = http.Client();
     try {
       final res = await client
@@ -85,7 +109,7 @@ class GitHubUpdates implements Updates {
       }
       final total = res.contentLength ?? 0;
       var received = 0;
-      final sink = file.openWrite();
+      final sink = part.openWrite();
       await for (final chunk in res.stream.timeout(
         const Duration(seconds: 30),
       )) {
@@ -102,15 +126,6 @@ class GitHubUpdates implements Updates {
       );
     } finally {
       client.close();
-    }
-    // Android asks once to "allow installs from Milk Tracker", then shows
-    // its Update screen. Data is kept: same app, same signing key.
-    final opened = await OpenFilex.open(
-      file.path,
-      type: 'application/vnd.android.package-archive',
-    );
-    if (opened.type != ResultType.done) {
-      throw UpdateException("Couldn't open the installer (${opened.message}).");
     }
   }
 }

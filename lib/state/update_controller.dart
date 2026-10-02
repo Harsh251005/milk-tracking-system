@@ -19,6 +19,11 @@ class UpdateDownloading extends UpdateState {
   final double progress;
 }
 
+/// Android's installer was opened; the person finishes there.
+class UpdateInstallerOpened extends UpdateState {
+  const UpdateInstallerOpened();
+}
+
 class UpdateFailed extends UpdateState {
   const UpdateFailed(this.message);
 
@@ -39,7 +44,9 @@ class UpdateController extends Notifier<UpdateState> {
             release,
             onProgress: (p) => state = UpdateDownloading(p),
           );
-      state = const UpdateIdle(); // the installer is on screen now
+      // If the update completes, the app restarts and this resets. If the
+      // person comes back without finishing, the card says what to do.
+      state = const UpdateInstallerOpened();
     } on UpdateException catch (e) {
       state = UpdateFailed(e.message);
     }

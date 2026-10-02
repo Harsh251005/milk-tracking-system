@@ -11,6 +11,8 @@ cd "$(dirname "$0")/.."
 NOTES=${1:?usage: tool/release.sh notes.md}
 V=$(sed -n 's/^version: \([0-9.]*\)+.*/\1/p' pubspec.yaml)
 git diff --quiet || { echo "Commit your changes first."; exit 1; }
+grep -q "'$V':" lib/changelog.dart || {
+  echo "Add a '$V' entry to lib/changelog.dart (shown as \"What's new\")."; exit 1; }
 
 flutter test
 flutter build apk --release --split-per-abi

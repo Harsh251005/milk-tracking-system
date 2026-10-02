@@ -3,12 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../state/providers.dart';
 import '../../state/update_controller.dart';
+import '../../ui/theme.dart';
 import '../../ui/widgets/section_card.dart';
 
-/// Shown on Today when a newer version is published. Downloads inside the
-/// app (no browser) with progress, then opens Android's installer.
+/// Shown on Today when a newer version is published. Walks the person
+/// through Android's install screens, which are the confusing part.
 class UpdateBanner extends ConsumerWidget {
   const UpdateBanner({super.key});
+
+  static const _steps = [
+    'Tap Update below and wait for the download.',
+    'If asked which app to use, pick "Package installer".',
+    'First time only: if asked, turn on "Allow from this source", then come '
+        'back here and tap Update again.',
+    'Tap Update on the screen that opens. Your milk log stays as it is.',
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -17,6 +26,7 @@ class UpdateBanner extends ConsumerWidget {
     final state = ref.watch(updateControllerProvider);
     final scheme = Theme.of(context).colorScheme;
     final t = Theme.of(context).textTheme;
+    void start() => ref.read(updateControllerProvider.notifier).start(release);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -37,13 +47,27 @@ class UpdateBanner extends ConsumerWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 6),
-            Text(
-              'Tap Update, then Install on the screen that opens. Your milk '
-              'log stays as it is.',
-              style: t.bodyMedium,
-            ),
             const SizedBox(height: 12),
+            for (final (i, step) in _steps.indexed)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CircleAvatar(
+                      radius: 12,
+                      backgroundColor: scheme.primary,
+                      child: Text(
+                        '${i + 1}',
+                        style: t.labelMedium?.copyWith(color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(step, style: t.bodyMedium)),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 4),
             switch (state) {
               UpdateDownloading(:final progress) => Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -67,26 +91,25 @@ class UpdateBanner extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (state case UpdateFailed(:final message))
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: scheme.errorContainer,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(message, style: t.bodyLarge),
-                      ),
+                    _Note(text: message, color: scheme.errorContainer),
+                  if (state is UpdateInstallerOpened)
+                    _Note(
+                      text:
+                          "Didn't finish? That's fine — tap Update again. "
+                          "It won't download again.",
+                      color: context.colors.missingSoft,
                     ),
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(0, 52),
                     ),
-                    onPressed: () => ref
-                        .read(updateControllerProvider.notifier)
-                        .start(release),
+                    onPressed: start,
                     icon: const Icon(Icons.download_rounded),
-                    label: Text(state is UpdateFailed ? 'Try again' : 'Update'),
+                    label: Text(switch (state) {
+                      UpdateFailed() => 'Try again',
+                      UpdateInstallerOpened() => 'Update again',
+                      _ => 'Update',
+                    }),
                   ),
                 ],
               ),
@@ -96,6 +119,26 @@ class UpdateBanner extends ConsumerWidget {
       ),
     );
   }
+}
+
+class _Note extends StatelessWidget {
+  const _Note({required this.text, required this.color});
+
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(text, style: Theme.of(context).textTheme.bodyLarge),
+    ),
+  );
 }
 
 /// "Milk Tracker 1.0.1" at the bottom of Settings, with the update if any.

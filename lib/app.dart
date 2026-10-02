@@ -9,9 +9,11 @@ import 'features/month/month_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/setup/setup_screen.dart';
 import 'features/today/today_screen.dart';
+import 'features/whats_new/whats_new_sheet.dart';
 import 'state/intro_provider.dart';
 import 'state/providers.dart';
 import 'state/reminder_providers.dart';
+import 'state/whats_new.dart';
 import 'ui/friendly_error.dart';
 import 'ui/theme.dart';
 import 'ui/widgets/status_views.dart';
@@ -43,6 +45,8 @@ class AppGate extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Decide "updated or fresh install?" now, before the intro can run.
+    ref.watch(whatsNewProvider);
     return Scaffold(
       body: AsyncView(
         value: ref.watch(signedInUidProvider),
@@ -87,6 +91,15 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         .writeErrors
         .listen(_showWriteError);
     _askReminderPermission();
+    _showWhatsNew();
+  }
+
+  /// After an update, show once what changed.
+  Future<void> _showWhatsNew() async {
+    final versions = await ref.read(whatsNewProvider.future);
+    if (versions.isEmpty || !mounted) return;
+    ref.read(whatsNewProvider.notifier).dismiss();
+    await showWhatsNew(context, versions);
   }
 
   /// The reminder is on by default, so ask for notification permission the

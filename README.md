@@ -29,8 +29,10 @@ in-app updates.
 5. Tap **Back up** on the card on Today so the log can be restored on a new
    phone (welcome screen → **Restore with Google**).
 
-Updates: when a new version is published, Today shows **Update available**;
-tap it, then tap the download to install over the old version. Data stays. Phones in one household see and log the same days live.
+Updates: when a new version is published, Today shows **Update available**
+with numbered steps; the update downloads inside the app and Android's
+installer finishes it. Data stays. After updating, a "What's new" note shows
+once. Phones in one household see and log the same days live.
 Each phone signs in anonymously (no login screen); logging works offline and
 syncs within seconds of reconnecting.
 
@@ -116,7 +118,9 @@ cd tool/rules-test && npm install && npm test   # free, runs locally
 
 ## Releasing an update
 1. Bump `version:` in `pubspec.yaml` (e.g. `1.0.1+4` — the number after `+`
-   must always go up).
+   must always go up), and add that version's plain-words notes to
+   `lib/changelog.dart` — phones show them once after updating ("What's
+   new"). `tool/release.sh` refuses to publish without them.
 2. Write what changed in a notes file, commit everything, then:
    `tool/release.sh notes.md` — runs the tests, builds one APK per phone type
    and publishes a GitHub Release. Phones show the update banner next open.
