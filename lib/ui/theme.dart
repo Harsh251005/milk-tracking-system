@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Colours beyond the Material scheme: one pair per day state.
 @immutable
@@ -95,6 +96,16 @@ ThemeData buildTheme() {
     textTheme: text.apply(bodyColor: _ink, displayColor: _ink),
     extensions: const [AppColors.light],
     splashFactory: InkSparkle.splashFactory,
+    // Dark status-bar icons on the light background, on every screen.
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      foregroundColor: _ink,
+      titleTextStyle: text.titleLarge?.copyWith(color: _ink),
+      systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+    ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size.fromHeight(64),

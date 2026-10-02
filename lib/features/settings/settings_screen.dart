@@ -9,6 +9,7 @@ import '../../ui/theme.dart';
 import '../../ui/widgets/forms.dart';
 import '../../ui/widgets/section_card.dart';
 import '../../ui/widgets/status_views.dart';
+import '../family/invite_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -66,19 +67,36 @@ class SettingsScreen extends ConsumerWidget {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
-                for (final (i, m) in h.members.entries.indexed) ...[
-                  if (i > 0) const _Divider(),
+                // This phone first, then everyone else.
+                for (final m
+                    in h.members.entries.toList()..sort(
+                      (a, b) => (a.key == currentUid ? 0 : 1).compareTo(
+                        b.key == currentUid ? 0 : 1,
+                      ),
+                    )) ...[
                   _Row(
                     icon: Icons.phone_android_rounded,
                     title: m.value,
                     subtitle: m.key == currentUid
                         ? 'This phone · tap to change name'
-                        : 'Connected',
+                        : 'Linked phone',
                     onTap: m.key == currentUid
                         ? () => _editName(context, ref, m.value)
-                        : null,
+                        : () => _removeMember(context, ref, m.key, m.value),
                   ),
+                  const _Divider(),
                 ],
+                _Row(
+                  icon: Icons.group_add_rounded,
+                  title: 'Add a family member',
+                  subtitle: 'Link another phone to this tracker',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          InviteScreen(invitedBy: h.memberName(currentUid)),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -112,6 +130,39 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
       );
+
+  Future<void> _removeMember(
+    BuildContext context,
+    WidgetRef ref,
+    String uid,
+    String name,
+  ) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Remove $name?'),
+        content: Text(
+          "$name's phone will stop seeing this tracker. Days they already "
+          'logged stay. You can add them again with a new code.',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Keep'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await ref.read(milkRepositoryProvider).removeMember(uid);
+  }
 
   Future<void> _editName(
     BuildContext context,

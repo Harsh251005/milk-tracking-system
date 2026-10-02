@@ -82,4 +82,17 @@ void main() {
     final h = await repo.watchHousehold().first;
     expect(h.members['mom'], 'Harsh');
   });
+
+  testWidgets('another phone can be removed after confirming', (tester) async {
+    await pumpSettings(tester);
+    await tapOn(tester, find.text('Dad'));
+    await tester.pumpAndSettle();
+    expect(find.text('Remove Dad?'), findsOneWidget);
+    await tapOn(tester, find.text('Remove'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dad'), findsNothing);
+    final h = await repo.watchHousehold().first;
+    expect(h.members.keys, ['mom']);
+  });
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/month/month_screen.dart';
@@ -21,6 +22,13 @@ class MilkTrackerApp extends StatelessWidget {
       title: 'Milk Tracker',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
+      // Screens without an app bar keep dark status-bar icons too.
+      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.dark.copyWith(
+          statusBarColor: Colors.transparent,
+        ),
+        child: child!,
+      ),
       home: const AppGate(),
     );
   }

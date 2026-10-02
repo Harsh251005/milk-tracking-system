@@ -1,36 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:milk_tracker/data/account_repository.dart';
-import 'package:milk_tracker/domain/models.dart';
 import 'package:milk_tracker/features/setup/setup_screen.dart';
 import 'package:milk_tracker/state/providers.dart';
 import 'package:milk_tracker/ui/theme.dart';
 
+import '../fakes.dart';
 import '../helpers.dart';
-
-class FakeAccountRepository implements AccountRepository {
-  ({String name, Product product, String? milkmanName, String? phone})? created;
-
-  @override
-  Stream<String?> watchHouseholdId() => Stream.value(null);
-
-  @override
-  Future<String> createHousehold({
-    required String memberName,
-    required Product product,
-    String? milkmanName,
-    String? milkmanPhone,
-  }) async {
-    created = (
-      name: memberName,
-      product: product,
-      milkmanName: milkmanName,
-      phone: milkmanPhone,
-    );
-    return 'h1';
-  }
-}
 
 void main() {
   late FakeAccountRepository account;

@@ -6,6 +6,8 @@ import '../../state/providers.dart';
 import '../../ui/friendly_error.dart';
 import '../../ui/theme.dart';
 import '../../ui/widgets/forms.dart';
+import '../../ui/widgets/section_card.dart';
+import '../join/join_screen.dart';
 
 /// First run: name -> milk -> milkman (skippable). Creates the household.
 class SetupScreen extends ConsumerStatefulWidget {
@@ -253,6 +255,32 @@ class _NameStep extends StatelessWidget {
           'added what.',
           style: Theme.of(context).textTheme.bodyMedium
               ?.copyWith(color: context.colors.muted),
+        ),
+        const SizedBox(height: 32),
+        SectionCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Someone at home already uses Milk Tracker?',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Join their tracker instead, so you both log the same days.',
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: context.colors.muted),
+              ),
+              const SizedBox(height: 14),
+              OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const JoinScreen()),
+                ),
+                icon: const Icon(Icons.group_add_rounded),
+                label: const Text('Join their tracker'),
+              ),
+            ],
+          ),
         ),
       ],
     );
