@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:milk_tracker/data/account_repository.dart';
 import 'package:milk_tracker/data/backup.dart';
 import 'package:milk_tracker/data/reminders.dart';
+import 'package:milk_tracker/data/updates.dart';
+import 'package:milk_tracker/domain/release.dart';
 import 'package:milk_tracker/domain/reminder.dart';
 import 'package:milk_tracker/domain/invite.dart';
 import 'package:milk_tracker/domain/models.dart';
@@ -96,4 +98,17 @@ class FakeBackup implements Backup {
     if (fail != null) throw BackupException(fail!);
     restores++;
   }
+}
+
+class FakeUpdates implements Updates {
+  FakeUpdates({this.installed = '1.0.0', this.published});
+
+  final String installed;
+  final AppRelease? published;
+
+  @override
+  Future<String> installedVersion() async => installed;
+
+  @override
+  Future<AppRelease?> latest() async => published;
 }

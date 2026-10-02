@@ -29,6 +29,7 @@ void main() {
           ),
           todayProvider.overrideWithValue(today),
           backupProvider.overrideWithValue(backup),
+          updatesProvider.overrideWithValue(FakeUpdates()),
           remindersProvider.overrideWithValue(FakeReminders()),
         ],
         child: MaterialApp(

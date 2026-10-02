@@ -18,6 +18,7 @@ import '../away/away_sheet.dart';
 import '../backup/backup_actions.dart';
 import '../logging/log_got.dart';
 import '../share/share_screen.dart';
+import '../update/update_banner.dart';
 
 class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key, required this.onOpenMonth});
@@ -143,6 +144,7 @@ class _TodayBodyState extends ConsumerState<_TodayBody> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
       children: [
+        const UpdateBanner(),
         _Header(today: widget.today),
         const SizedBox(height: 20),
         if (showEditor)

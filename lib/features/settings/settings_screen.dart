@@ -14,6 +14,7 @@ import '../../ui/widgets/section_card.dart';
 import '../../ui/widgets/status_views.dart';
 import '../backup/backup_actions.dart';
 import '../family/invite_screen.dart';
+import '../update/update_banner.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -108,6 +109,7 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SectionLabel('Backup'),
           const SectionCard(padding: EdgeInsets.zero, child: _BackupRow()),
+          const VersionFooter(),
         ],
       ),
     );

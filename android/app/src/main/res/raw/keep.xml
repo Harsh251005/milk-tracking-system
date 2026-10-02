@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Resources looked up by name at runtime, which release-build resource
+     shrinking can't see are used:
+     - ic_stat_milk: the reminder notification's icon (named from Dart).
+     - default_web_client_id: Google sign-in's client id (from
+       google-services.json); without it, backup/restore fail in release
+       with clientConfigurationError. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_stat_milk,@string/default_web_client_id" />

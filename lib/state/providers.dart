@@ -7,8 +7,10 @@ import '../data/backup.dart';
 import '../data/firebase/firebase_account_repository.dart';
 import '../data/firebase/firestore_milk_repository.dart';
 import '../data/milk_repository.dart';
+import '../data/updates.dart';
 import '../domain/dates.dart';
 import '../domain/models.dart';
+import '../domain/release.dart';
 import 'clock.dart';
 
 // --- Session: who is this phone, and which household is it in? ------------
@@ -75,3 +77,17 @@ final monthEntriesProvider = StreamProvider.family<List<DayEntry>, YearMonth>(
 final monthPaymentProvider = StreamProvider.family<MonthPayment?, YearMonth>(
   (ref, month) => ref.watch(milkRepositoryProvider).watchPayment(month),
 );
+
+// --- App updates ------------------------------------------------------------
+
+final updatesProvider = Provider<Updates>((ref) => GitHubUpdates());
+
+final installedVersionProvider = FutureProvider<String>(
+  (ref) => ref.watch(updatesProvider).installedVersion(),
+);
+
+/// A newer release to offer, or null. Checked once per app start.
+final availableUpdateProvider = FutureProvider<AppRelease?>((ref) async {
+  final installed = await ref.watch(installedVersionProvider.future);
+  return updateFor(installed, await ref.watch(updatesProvider).latest());
+});

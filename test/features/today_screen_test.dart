@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:milk_tracker/data/memory_milk_repository.dart';
 import 'package:milk_tracker/domain/models.dart';
+import 'package:milk_tracker/domain/release.dart';
 import 'package:milk_tracker/features/today/today_screen.dart';
 import 'package:milk_tracker/state/providers.dart';
 import 'package:milk_tracker/ui/theme.dart';
@@ -22,6 +23,7 @@ void main() {
       ProviderScope(
         overrides: [
           backupProvider.overrideWithValue(FakeBackup()),
+          updatesProvider.overrideWithValue(FakeUpdates()),
           milkRepositoryProvider.overrideWithValue(repo),
           todayProvider.overrideWithValue(today),
         ],
@@ -137,6 +139,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         backupProvider.overrideWithValue(FakeBackup()),
+        updatesProvider.overrideWithValue(FakeUpdates()),
         milkRepositoryProvider.overrideWithValue(repo),
         todayProvider.overrideWith((ref) => ref.watch(_testDay)),
       ],
@@ -177,6 +180,40 @@ void main() {
     final tomorrow = entries.where((e) => e.date == DateTime(2026, 10, 3));
     expect(tomorrow.single.status, DayStatus.skipped);
     expect(tomorrow.single.byName, 'Mom');
+  });
+
+  testWidgets('a newer published version shows the update banner', (
+    tester,
+  ) async {
+    usePhoneScreen(tester);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          milkRepositoryProvider.overrideWithValue(
+            MemoryMilkRepository.sample(today: today),
+          ),
+          todayProvider.overrideWithValue(today),
+          backupProvider.overrideWithValue(FakeBackup()),
+          updatesProvider.overrideWithValue(
+            FakeUpdates(
+              installed: '1.0.0',
+              published: const AppRelease(version: '1.0.1', apkUrl: 'u'),
+            ),
+          ),
+        ],
+        child: MaterialApp(
+          theme: buildTheme(),
+          home: Scaffold(body: TodayScreen(onOpenMonth: () {})),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Update available · version 1.0.1'), findsOneWidget);
+  });
+
+  testWidgets('no banner when up to date', (tester) async {
+    await pumpToday(tester);
+    expect(find.textContaining('Update available'), findsNothing);
   });
 }
 

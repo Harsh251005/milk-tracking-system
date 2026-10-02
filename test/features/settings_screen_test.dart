@@ -25,6 +25,7 @@ void main() {
       ProviderScope(
         overrides: [
           backupProvider.overrideWithValue(FakeBackup()),
+          updatesProvider.overrideWithValue(FakeUpdates()),
           milkRepositoryProvider.overrideWithValue(repo),
           remindersProvider.overrideWithValue(reminders),
           todayProvider.overrideWithValue(DateTime(2026, 10, 2)),
