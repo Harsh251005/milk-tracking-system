@@ -50,11 +50,13 @@ class FakeAccountRepository implements AccountRepository {
 }
 
 class FakeReminders implements Reminders {
-  FakeReminders({this.allowed = true});
+  FakeReminders({this.allowed = true, bool enabled = false})
+    : settings = ReminderSettings(enabled: enabled);
 
   /// What the phone answers when asked for notification permission.
   final bool allowed;
-  ReminderSettings settings = const ReminderSettings();
+  ReminderSettings settings;
+  bool asked = false;
   List<DateTime> scheduled = const [];
 
   @override
@@ -65,6 +67,13 @@ class FakeReminders implements Reminders {
 
   @override
   Future<bool> requestPermission() async => allowed;
+
+  @override
+  Future<bool?> requestPermissionOnce() async {
+    if (asked) return null;
+    asked = true;
+    return allowed;
+  }
 
   @override
   Future<void> schedule(List<DateTime> times) async => scheduled = times;

@@ -241,15 +241,6 @@ class _NameStep extends StatelessWidget {
           onChanged: onChanged,
           decoration: const InputDecoration(hintText: 'Your name'),
         ),
-        const SizedBox(height: 10),
-        SuggestionChips(
-          options: const ['Mom', 'Dad'],
-          selected: name,
-          onPick: (v) {
-            controller.text = v;
-            onChanged(v);
-          },
-        ),
         const SizedBox(height: 12),
         Text(
           'This shows next to the days you log, so the family knows who '

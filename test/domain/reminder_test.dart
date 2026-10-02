@@ -7,7 +7,7 @@ void main() {
   test('off means no reminders', () {
     expect(
       reminderTimes(
-        settings: const ReminderSettings(),
+        settings: const ReminderSettings(enabled: false),
         now: DateTime(2026, 10, 2, 8),
         loggedDayKeys: {},
       ),
@@ -38,5 +38,11 @@ void main() {
   test('ids are unique per day and fit in an int', () {
     expect(reminderId(DateTime(2026, 10, 2)), 20261002);
     expect(reminderId(DateTime(2026, 12, 31)), lessThan(1 << 31));
+  });
+
+  test('the reminder is on by default, at 9 PM', () {
+    const s = ReminderSettings();
+    expect(s.enabled, isTrue);
+    expect((s.hour, s.minute), (21, 0));
   });
 }

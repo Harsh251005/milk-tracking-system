@@ -151,12 +151,6 @@ class _JoinScreenState extends ConsumerState<JoinScreen> {
                       onChanged: (_) => setState(() {}),
                       decoration: const InputDecoration(hintText: 'Your name'),
                     ),
-                    const SizedBox(height: 10),
-                    SuggestionChips(
-                      options: const ['Mom', 'Dad'],
-                      selected: _nameController.text,
-                      onPick: (v) => setState(() => _nameController.text = v),
-                    ),
                   ],
                   if (_problem != null) ...[
                     const SizedBox(height: 20),

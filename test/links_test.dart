@@ -8,6 +8,7 @@ void main() {
       endsWith('/releases/latest/download/milk-tracker-arm64-v8a.apk'),
     );
     expect(shareAppText, contains(downloadLink));
-    expect(shareAppText, contains(releasesPage));
+    expect(shareAppText, isNot(contains('/releases/latest\n')));
+    expect(shareAppText.split('https://').length, 2, reason: 'one link only');
   });
 }

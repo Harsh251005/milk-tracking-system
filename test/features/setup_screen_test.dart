@@ -32,7 +32,8 @@ void main() {
     await pumpSetup(tester);
 
     expect(primary(tester).onPressed, isNull, reason: 'name required');
-    await tapOn(tester, find.text('Mom'));
+    expect(find.text('Mom'), findsNothing, reason: 'no name suggestions');
+    await typeInto(tester, find.byType(TextField), 'Sunita');
     await tester.pump();
     await tapOn(tester, find.text('Next'));
     await tester.pumpAndSettle();
@@ -53,7 +54,7 @@ void main() {
     await tester.pump();
 
     final c = account.created!;
-    expect(c.name, 'Mom');
+    expect(c.name, 'Sunita');
     expect(c.product.name, 'Buffalo milk');
     expect(c.product.ratePaise, 8000);
     expect(c.product.usualMl, 1500);

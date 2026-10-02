@@ -16,8 +16,6 @@ in-app updates.
 ## Installing on a family phone
 1. On the phone, open this link — it always downloads the newest version:
    https://github.com/Harsh251005/milk-tracking-system/releases/latest/download/milk-tracker-arm64-v8a.apk
-   (Very old phones: pick `milk-tracker-armeabi-v7a.apk` on
-   https://github.com/Harsh251005/milk-tracking-system/releases/latest)
 2. Or share it from a phone that has the app: Settings → **Share Milk
    Tracker** sends the link on WhatsApp.
 3. Tap the download. Android asks to allow installing from the browser once —
@@ -53,13 +51,15 @@ syncs within seconds of reconnecting.
   a 6-digit code (valid 24 h). On the other phone, *Join their tracker* scans
   or types it. Old or lost phones can be removed from the family.
 - **Message the milkman:** monthly bill, today's delivery, or tomorrow's
-  order. Switches choose what goes in (day list, litres, price, amount), the
-  text can be edited, and *Open WhatsApp* opens his chat with it filled in —
+  order — just the values (dates, litres, price, amount), no greeting; the
+  sender adds their own words. Switches choose what goes in, the text can be
+  edited, and *Open WhatsApp* opens his chat with it filled in —
   nothing is ever sent automatically. Switch choices are remembered per phone.
 - **Going away:** pick From/Until; those days are marked no milk in one go,
-  with a ready "please don't send milk until …" message for the milkman.
-- **Daily reminder:** Settings → Reminder sends "Did milk come today?" at a
-  chosen time, skipped on days already logged (on any phone).
+  with a ready message for the milkman (the dates only).
+- **Daily reminder:** on by default at 9 PM ("Did milk come today?"), skipped
+  on days already logged (on any phone). Change the time or turn it off in
+  Settings → Reminder.
 - **Always today:** the date refreshes at midnight and when the app returns
   from the background, so an app left open overnight never logs to yesterday.
 - **Errors are loud:** a save the server rejects shows a red banner with the

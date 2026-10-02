@@ -14,6 +14,10 @@ abstract interface class Reminders {
   /// Asks Android for permission to show notifications. True if allowed.
   Future<bool> requestPermission();
 
+  /// Asks only the first time it is called on this phone; afterwards
+  /// returns null without asking again.
+  Future<bool?> requestPermissionOnce();
+
   /// Replaces all scheduled reminders with [times].
   Future<void> schedule(List<DateTime> times);
 }
@@ -49,8 +53,9 @@ class LocalNotificationReminders implements Reminders {
   Future<ReminderSettings> load() async {
     final p = await SharedPreferences.getInstance();
     return ReminderSettings(
-      enabled: p.getBool(_enabled) ?? false,
-      hour: p.getInt(_hour) ?? 10,
+      // On by default; the person can turn it off or change the time.
+      enabled: p.getBool(_enabled) ?? true,
+      hour: p.getInt(_hour) ?? 21,
       minute: p.getInt(_minute) ?? 0,
     );
   }
@@ -70,7 +75,20 @@ class LocalNotificationReminders implements Reminders {
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >();
-    return await android?.requestNotificationsPermission() ?? false;
+    if (android == null) return false;
+    // Already allowed (always the case before Android 13): don't prompt.
+    if (await android.areNotificationsEnabled() ?? false) return true;
+    return await android.requestNotificationsPermission() ?? false;
+  }
+
+  static const _asked = 'reminder.permissionAsked';
+
+  @override
+  Future<bool?> requestPermissionOnce() async {
+    final p = await SharedPreferences.getInstance();
+    if (p.getBool(_asked) ?? false) return null;
+    await p.setBool(_asked, true);
+    return requestPermission();
   }
 
   @override

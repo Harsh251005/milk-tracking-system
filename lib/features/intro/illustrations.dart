@@ -371,8 +371,8 @@ class BillIllustration extends StatelessWidget {
   const BillIllustration({super.key});
 
   static const _lines = [
-    ('Namaste Ramesh,', false),
-    ('Milk for October:', false),
+    ('October 2026', false),
+    ('1 Oct – 1 L', false),
     ('Total: 30 L', true),
     ('Amount: ₹2,100', true),
   ];

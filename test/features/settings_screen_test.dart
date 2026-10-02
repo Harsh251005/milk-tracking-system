@@ -118,7 +118,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(reminders.settings.enabled, isTrue);
-    expect(find.textContaining('Every day at 10:00'), findsOneWidget);
+    expect(find.textContaining('Every day at 9:00 PM'), findsOneWidget);
   });
 
   testWidgets('blocked notifications explain how to allow them', (
@@ -136,5 +136,31 @@ void main() {
     await pumpSettings(tester);
     await tester.scrollUntilVisible(find.text('Share Milk Tracker'), 300);
     expect(find.text('Send the download link on WhatsApp'), findsOneWidget);
+  });
+
+  testWidgets('a fresh install shows the reminder on', (tester) async {
+    usePhoneScreen(tester);
+    final fresh = FakeReminders(enabled: true);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          milkRepositoryProvider.overrideWithValue(
+            MemoryMilkRepository.sample(today: DateTime(2026, 10, 2)),
+          ),
+          remindersProvider.overrideWithValue(fresh),
+          todayProvider.overrideWithValue(DateTime(2026, 10, 2)),
+          backupProvider.overrideWithValue(FakeBackup()),
+          updatesProvider.overrideWithValue(FakeUpdates()),
+        ],
+        child: MaterialApp(
+          theme: buildTheme(),
+          home: const Scaffold(body: SettingsScreen()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Daily reminder'), 200);
+    expect(find.textContaining('Every day at 9:00 PM'), findsOneWidget);
+    expect(fresh.scheduled, isNotEmpty);
   });
 }

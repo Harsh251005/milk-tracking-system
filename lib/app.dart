@@ -86,6 +86,21 @@ class _HomeShellState extends ConsumerState<HomeShell> {
         .read(milkRepositoryProvider)
         .writeErrors
         .listen(_showWriteError);
+    _askReminderPermission();
+  }
+
+  /// The reminder is on by default, so ask for notification permission the
+  /// first time the app opens after setup. If refused, switch it off so
+  /// Settings doesn't claim a reminder that can't show.
+  Future<void> _askReminderPermission() async {
+    final settings = await ref.read(reminderSettingsProvider.future);
+    if (!settings.enabled) return;
+    final allowed = await ref.read(remindersProvider).requestPermissionOnce();
+    if (allowed == false && mounted) {
+      await ref
+          .read(reminderSettingsProvider.notifier)
+          .set(settings.copyWith(enabled: false));
+    }
   }
 
   @override

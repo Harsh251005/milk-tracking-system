@@ -52,11 +52,6 @@ class BillOptions {
   );
 }
 
-String _greeting(Household h) {
-  final name = h.milkmanName?.trim() ?? '';
-  return name.isEmpty ? 'Namaste,' : 'Namaste $name,';
-}
-
 String _day(DateTime d) => DateFormat('d MMM').format(d);
 String _dayLong(DateTime d) => DateFormat('EEE, d MMM').format(d);
 
@@ -138,7 +133,7 @@ String billMessage({
   final monthName = DateFormat('MMMM yyyy')
       .format(DateTime(month.year, month.month));
 
-  final out = <String>[_greeting(household), 'Milk for $monthName:'];
+  final out = <String>[monthName];
 
   if (options.dayList && inMonth.isNotEmpty) {
     out.add('');
@@ -164,20 +159,18 @@ String billMessage({
   return out.join('\n');
 }
 
+// Messages carry only the facts; the sender adds any greeting themselves.
+
 String todayMessage({
   required Household household,
   required DayEntry entry,
   required bool includePrice,
 }) {
-  final when = 'today (${_dayLong(entry.date)})';
-  if (entry.status == DayStatus.skipped) {
-    return '${_greeting(household)}\nNo milk $when.';
-  }
+  final day = _dayLong(entry.date);
+  if (entry.status == DayStatus.skipped) return '$day: no milk';
   final price = includePrice ? _rateLines(household, [entry]) : const [];
-  return '${_greeting(household)}\n'
-      'Received ${_quantities(household, entry.quantitiesMl)} milk $when.'
-      '${price.isEmpty ? '' : '\nRate: ${price.join(', ')}'}\n'
-      'Thank you.';
+  return '$day: ${_quantities(household, entry.quantitiesMl)}'
+      '${price.isEmpty ? '' : '\nRate: ${price.join(', ')}'}';
 }
 
 String tomorrowMessage({
@@ -185,13 +178,10 @@ String tomorrowMessage({
   required DateTime tomorrow,
   required Map<String, int> quantitiesMl,
 }) {
-  final when = 'tomorrow (${_dayLong(tomorrow)})';
+  final when = 'Tomorrow (${_dayLong(tomorrow)})';
   final total = quantitiesMl.values.fold(0, (a, b) => a + b);
-  if (total == 0) {
-    return "${_greeting(household)}\nPlease don't send milk $when.";
-  }
-  return '${_greeting(household)}\n'
-      'Please send ${_quantities(household, quantitiesMl)} milk $when.';
+  if (total == 0) return '$when: no milk';
+  return '$when: ${_quantities(household, quantitiesMl)}';
 }
 
 String awayMessage({
@@ -200,10 +190,8 @@ String awayMessage({
   required DateTime to,
 }) {
   final back = DateTime(to.year, to.month, to.day + 1);
-  final when = isSameDay(from, to)
-      ? 'on ${_dayLong(from)}'
-      : 'from ${_dayLong(from)} to ${_dayLong(to)}';
-  return '${_greeting(household)}\n'
-      "We will be away. Please don't send milk $when.\n"
-      'Please start again from ${_dayLong(back)}.';
+  final days = isSameDay(from, to)
+      ? _dayLong(from)
+      : '${_dayLong(from)} – ${_dayLong(to)}';
+  return 'No milk: $days\nRestart: ${_dayLong(back)}';
 }

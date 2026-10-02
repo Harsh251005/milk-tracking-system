@@ -48,10 +48,9 @@ void main() {
         options: o,
       );
 
-  test('default bill: greeting, day list, total and amount', () {
+  test('default bill: month, day list, total and amount — no greeting', () {
     expect(bill(const BillOptions()), '''
-Namaste Ramesh,
-Milk for October 2026:
+October 2026
 
 1 Oct – 1 L
 2 Oct – 1½ L
@@ -88,7 +87,7 @@ Amount: ₹245''');
     expect(text, contains('Amount: ₹284'));
   });
 
-  test('everything off leaves just the greeting and month', () {
+  test('everything off leaves just the month', () {
     expect(
       bill(
         const BillOptions(
@@ -99,7 +98,7 @@ Amount: ₹245''');
           noMilkDays: false,
         ),
       ),
-      'Namaste Ramesh,\nMilk for October 2026:',
+      'October 2026',
     );
   });
 
@@ -119,23 +118,23 @@ Amount: ₹245''');
       at: DateTime(2026, 10, 1),
     );
     final text = bill(const BillOptions(), e: [e], h: both);
-    expect(text, startsWith('Namaste,\n'));
+    expect(text, startsWith('October 2026\n'));
     expect(text, contains('1 Oct – Cow milk 1 L, Curd ½ L'));
     expect(text, contains('Amount: ₹130'));
   });
 
-  test('today and tomorrow messages', () {
+  test('today and tomorrow messages carry only the values', () {
     expect(
       todayMessage(household: home, entry: got(2, 1500), includePrice: false),
-      'Namaste Ramesh,\nReceived 1½ L milk today (Fri, 2 Oct).\nThank you.',
+      'Fri, 2 Oct: 1½ L',
     );
     expect(
       todayMessage(household: home, entry: got(2, 1500), includePrice: true),
-      contains('Rate: ₹70 per litre'),
+      'Fri, 2 Oct: 1½ L\nRate: ₹70 per litre',
     );
     expect(
       todayMessage(household: home, entry: skipped(3), includePrice: false),
-      'Namaste Ramesh,\nNo milk today (Sat, 3 Oct).',
+      'Sat, 3 Oct: no milk',
     );
     expect(
       tomorrowMessage(
@@ -143,7 +142,7 @@ Amount: ₹245''');
         tomorrow: DateTime(2026, 10, 3),
         quantitiesMl: const {'cow': 2000},
       ),
-      'Namaste Ramesh,\nPlease send 2 L milk tomorrow (Sat, 3 Oct).',
+      'Tomorrow (Sat, 3 Oct): 2 L',
     );
     expect(
       tomorrowMessage(
@@ -151,7 +150,7 @@ Amount: ₹245''');
         tomorrow: DateTime(2026, 10, 3),
         quantitiesMl: const {'cow': 0},
       ),
-      "Namaste Ramesh,\nPlease don't send milk tomorrow (Sat, 3 Oct).",
+      'Tomorrow (Sat, 3 Oct): no milk',
     );
   });
 
@@ -170,9 +169,7 @@ Amount: ₹245''');
         from: DateTime(2026, 10, 3),
         to: DateTime(2026, 10, 7),
       ),
-      'Namaste Ramesh,\n'
-      "We will be away. Please don't send milk from Sat, 3 Oct to Wed, 7 Oct.\n"
-      'Please start again from Thu, 8 Oct.',
+      'No milk: Sat, 3 Oct – Wed, 7 Oct\nRestart: Thu, 8 Oct',
     );
     expect(
       awayMessage(
@@ -180,9 +177,32 @@ Amount: ₹245''');
         from: DateTime(2026, 10, 31),
         to: DateTime(2026, 10, 31),
       ),
-      contains(
-        "don't send milk on Sat, 31 Oct.\nPlease start again from Sun, 1 Nov.",
-      ),
+      'No milk: Sat, 31 Oct\nRestart: Sun, 1 Nov',
     );
+  });
+
+  test('no message has a greeting or sign-off', () {
+    final all = [
+      bill(const BillOptions()),
+      todayMessage(household: home, entry: got(2, 1000), includePrice: true),
+      tomorrowMessage(
+        household: home,
+        tomorrow: DateTime(2026, 10, 3),
+        quantitiesMl: const {'cow': 1000},
+      ),
+      awayMessage(
+        household: home,
+        from: DateTime(2026, 10, 3),
+        to: DateTime(2026, 10, 4),
+      ),
+    ];
+    for (final m in all) {
+      expect(
+        m,
+        isNot(
+          matches(RegExp('Namaste|Ramesh|Please|Thank', caseSensitive: false)),
+        ),
+      );
+    }
   });
 }

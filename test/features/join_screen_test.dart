@@ -68,12 +68,13 @@ void main() {
     await enterCode(tester, '482 913');
 
     expect(find.text("Join Mom's tracker"), findsOneWidget);
-    await tapOn(tester, find.text('Dad'));
+    expect(find.text('Dad'), findsNothing, reason: 'no name suggestions');
+    await typeInto(tester, find.byType(TextField), 'Ramesh');
     await tester.pump();
     await tapOn(tester, find.text('Join'));
     await tester.pumpAndSettle();
 
-    expect(account.joined?.name, 'Dad');
+    expect(account.joined?.name, 'Ramesh');
     expect(account.joined?.invite.householdId, 'h1');
     expect(find.byType(JoinScreen), findsNothing, reason: 'closes after join');
   });

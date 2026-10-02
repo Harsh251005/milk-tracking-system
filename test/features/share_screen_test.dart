@@ -43,7 +43,7 @@ void main() {
     tester,
   ) async {
     await pumpShare(tester, MessageKind.bill);
-    expect(message(tester), startsWith('Namaste Ramesh bhaiya,'));
+    expect(message(tester), startsWith('October 2026'));
     expect(message(tester), contains('Amount: ₹'));
 
     await tapOn(tester, find.text('Total amount'));
@@ -55,14 +55,11 @@ void main() {
 
   testWidgets('tomorrow: usual amount, or no milk', (tester) async {
     await pumpShare(tester, MessageKind.tomorrow);
-    expect(
-      message(tester),
-      contains('Please send 1 L milk tomorrow (Sun, 11 Oct)'),
-    );
+    expect(message(tester), 'Tomorrow (Sun, 11 Oct): 1 L');
 
     await tapOn(tester, find.text('No milk tomorrow'));
     await tester.pumpAndSettle();
-    expect(message(tester), contains("Please don't send milk tomorrow"));
+    expect(message(tester), 'Tomorrow (Sun, 11 Oct): no milk');
   });
 
   testWidgets('today asks to log first when nothing is logged', (tester) async {

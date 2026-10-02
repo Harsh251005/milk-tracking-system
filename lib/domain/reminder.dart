@@ -2,8 +2,8 @@ import 'dates.dart';
 
 class ReminderSettings {
   const ReminderSettings({
-    this.enabled = false,
-    this.hour = 10,
+    this.enabled = true,
+    this.hour = 21,
     this.minute = 0,
   });
 
