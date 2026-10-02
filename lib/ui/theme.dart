@@ -62,6 +62,10 @@ ThemeData buildTheme() {
         onSurface: _ink,
         primaryContainer: const Color(0xFFDCE6F2),
         onPrimaryContainer: _primary,
+        // The seed's pink tertiary showed up in the time and date pickers.
+        tertiary: _primary,
+        tertiaryContainer: const Color(0xFFDCE6F2),
+        onTertiaryContainer: _primary,
       );
 
   const text = TextTheme(

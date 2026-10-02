@@ -8,6 +8,7 @@ Two phones in one household stay in sync.
 distribution via GitHub Releases — no Play Store.
 
 ## Status
+v0.7.0 (M7) — going away, daily reminder, app icon and splash.
 M6 — WhatsApp messages to the milkman. M5 — family sync. Phones in one household see and log the same days live.
 Each phone signs in anonymously (no login screen); logging works offline and
 syncs within seconds of reconnecting.
@@ -33,6 +34,10 @@ syncs within seconds of reconnecting.
   order. Switches choose what goes in (day list, litres, price, amount), the
   text can be edited, and *Open WhatsApp* opens his chat with it filled in —
   nothing is ever sent automatically. Switch choices are remembered per phone.
+- **Going away:** pick From/Until; those days are marked no milk in one go,
+  with a ready "please don't send milk until …" message for the milkman.
+- **Daily reminder:** Settings → Reminder sends "Did milk come today?" at a
+  chosen time, skipped on days already logged (on any phone).
 - **Always today:** the date refreshes at midnight and when the app returns
   from the background, so an app left open overnight never logs to yesterday.
 - **Errors are loud:** a save the server rejects shows a red banner with the
@@ -59,6 +64,15 @@ flutter test
 Font: Nunito (SIL Open Font License, `assets/fonts/OFL.txt`), bundled in two
 subsets — `latin` for ½ ¼ ¾ and `latin-ext` for ₹ — with the second set as a
 fallback in the theme.
+
+## Icons
+Artwork is drawn in code by `tool/make_icons.py` (Pillow) into `assets/icon/`,
+then turned into Android resources:
+```bash
+python tool/make_icons.py
+dart run flutter_launcher_icons
+dart run flutter_native_splash:create
+```
 
 ## Firebase
 Project `milk-tracker-hd` (free Spark plan, Firestore in `asia-south1`).
