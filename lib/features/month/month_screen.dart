@@ -12,6 +12,7 @@ import '../../ui/theme.dart';
 import '../../ui/widgets/section_card.dart';
 import '../../ui/widgets/status_views.dart';
 import 'calendar_grid.dart';
+import '../share/share_screen.dart';
 import 'entry_sheet.dart';
 
 class MonthScreen extends ConsumerStatefulWidget {
@@ -408,13 +409,11 @@ class _PaymentBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final share = OutlinedButton.icon(
       style: OutlinedButton.styleFrom(minimumSize: const Size(0, 56)),
-      onPressed: () => ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('WhatsApp sharing comes in a later update.'),
-          ),
+      onPressed: () => Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => ShareScreen(kind: MessageKind.bill, month: month),
         ),
+      ),
       icon: const Icon(Icons.share_rounded),
       label: const Text('Share'),
     );

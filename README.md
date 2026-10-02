@@ -8,7 +8,7 @@ Two phones in one household stay in sync.
 distribution via GitHub Releases — no Play Store.
 
 ## Status
-M5 — family sync. Phones in one household see and log the same days live.
+M6 — WhatsApp messages to the milkman. M5 — family sync. Phones in one household see and log the same days live.
 Each phone signs in anonymously (no login screen); logging works offline and
 syncs within seconds of reconnecting.
 
@@ -29,6 +29,10 @@ syncs within seconds of reconnecting.
 - **Family:** Settings → Family → *Add a family member* shows a QR code and
   a 6-digit code (valid 24 h). On the other phone, *Join their tracker* scans
   or types it. Old or lost phones can be removed from the family.
+- **Message the milkman:** monthly bill, today's delivery, or tomorrow's
+  order. Switches choose what goes in (day list, litres, price, amount), the
+  text can be edited, and *Open WhatsApp* opens his chat with it filled in —
+  nothing is ever sent automatically. Switch choices are remembered per phone.
 - **Always today:** the date refreshes at midnight and when the app returns
   from the background, so an app left open overnight never logs to yesterday.
 - **Errors are loud:** a save the server rejects shows a red banner with the
