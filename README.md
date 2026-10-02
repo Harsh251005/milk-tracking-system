@@ -17,6 +17,10 @@ Nothing is saved yet; Firestore arrives in M3.
 - **Month:** calendar with litres per day, "no milk" and "not logged" days;
   tap a day to edit, press-and-hold to select several and edit them together;
   monthly total, bill, and mark as paid.
+- **Price per log:** each milk type has a saved price. Any log (today, a past
+  day, or several days at once) can use a different price via "Change". If it
+  differs from the saved one, the app explains and asks: only for these days,
+  use it from now on, or keep the saved price. Logged days keep their own price.
 - **Settings:** milk type and rate, milkman, family members (read-only for now).
 
 ## Layout

@@ -8,6 +8,7 @@ import '../../domain/models.dart';
 import '../../state/providers.dart';
 import '../../ui/theme.dart';
 import '../../ui/widgets/quantity_editor.dart';
+import '../logging/log_got.dart';
 
 /// Edits one day, or several at once (bulk). Returns true if anything changed.
 Future<bool> showEntrySheet(
@@ -46,6 +47,10 @@ class _EntrySheetState extends ConsumerState<_EntrySheet> {
     widget.household,
     widget.existing,
   );
+  late Map<String, int> _rates = initialRates(
+    widget.household,
+    widget.existing,
+  );
 
   bool get _single => widget.days.length == 1;
 
@@ -79,24 +84,27 @@ class _EntrySheetState extends ConsumerState<_EntrySheet> {
             products: widget.household.products,
             quantitiesMl: _draft,
             onChanged: (d) => setState(() => _draft = d),
+            ratesPaise: _rates,
+            onRatesChanged: (r) => setState(() => _rates = r),
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
             style: FilledButton.styleFrom(backgroundColor: context.colors.got),
             onPressed: total == 0
                 ? null
-                : () => _apply(
-                    () => repo.saveEntries([
-                      for (final d in widget.days)
-                        gotEntry(
-                          date: d,
-                          household: widget.household,
-                          quantitiesMl: _draft,
-                          byUid: repo.currentUid,
-                          now: now,
-                        ),
-                    ]),
-                  ),
+                : () async {
+                    final saved = await logGot(
+                      context,
+                      ref,
+                      household: widget.household,
+                      days: widget.days,
+                      quantitiesMl: _draft,
+                      ratesPaise: _rates,
+                    );
+                    if (saved && context.mounted) {
+                      Navigator.of(context).pop(true);
+                    }
+                  },
             icon: const Icon(Icons.check_rounded, size: 28),
             label: Text(
               _single

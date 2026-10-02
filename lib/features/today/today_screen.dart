@@ -8,11 +8,13 @@ import '../../domain/dates.dart';
 import '../../domain/entries.dart';
 import '../../domain/format.dart';
 import '../../domain/models.dart';
+import '../../domain/rates.dart';
 import '../../state/providers.dart';
 import '../../ui/theme.dart';
 import '../../ui/widgets/quantity_editor.dart';
 import '../../ui/widgets/section_card.dart';
 import '../../ui/widgets/status_views.dart';
+import '../logging/log_got.dart';
 
 class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key, required this.onOpenMonth});
@@ -58,44 +60,72 @@ class _TodayBodyState extends ConsumerState<_TodayBody> {
   bool _editing = false;
   Map<String, int>? _draft;
 
+  /// Only prices that differ from the saved ones, so a saved-price change
+  /// made on the other phone still flows through.
+  Map<String, int> _rateOverrides = {};
+
   DayEntry? get _entry =>
       widget.entries.where((e) => isSameDay(e.date, widget.today)).firstOrNull;
 
-  Future<void> _save(DayEntry entry) async {
+  Map<String, int> get _rates => {
+    ...savedRates(widget.household),
+    ..._rateOverrides,
+  };
+
+  void _setRates(Map<String, int> rates) => setState(() {
+    final saved = savedRates(widget.household);
+    _rateOverrides = {
+      for (final e in rates.entries)
+        if (e.value != saved[e.key]) e.key: e.value,
+    };
+  });
+
+  void _startEditing(DayEntry? entry) {
+    _draft = initialQuantities(widget.household, entry);
+    final saved = savedRates(widget.household);
+    _rateOverrides = {
+      for (final e in initialRates(widget.household, entry).entries)
+        if (e.value != saved[e.key]) e.key: e.value,
+    };
+  }
+
+  void _done() {
     HapticFeedback.mediumImpact();
-    await ref.read(milkRepositoryProvider).saveEntries([entry]);
     if (mounted) setState(() => _editing = false);
   }
 
-  void _logGot() {
-    final repo = ref.read(milkRepositoryProvider);
-    _save(
-      gotEntry(
-        date: widget.today,
-        household: widget.household,
-        quantitiesMl: _draft!,
-        byUid: repo.currentUid,
-        now: DateTime.now(),
-      ),
+  Future<void> _logGot() async {
+    final saved = await logGot(
+      context,
+      ref,
+      household: widget.household,
+      days: [widget.today],
+      quantitiesMl: _draft!,
+      ratesPaise: _rates,
     );
+    if (saved) {
+      _rateOverrides = {};
+      _done();
+    }
   }
 
-  void _logSkipped() {
+  Future<void> _logSkipped() async {
     final repo = ref.read(milkRepositoryProvider);
-    _save(
+    await repo.saveEntries([
       skippedEntry(
         date: widget.today,
         byUid: repo.currentUid,
         now: DateTime.now(),
       ),
-    );
+    ]);
+    _done();
   }
 
   @override
   Widget build(BuildContext context) {
     final entry = _entry;
     final showEditor = entry == null || _editing;
-    _draft ??= initialQuantities(widget.household, entry);
+    if (_draft == null) _startEditing(entry);
     final summary = summarizeMonth(
       month: monthOf(widget.today),
       entries: widget.entries,
@@ -112,6 +142,8 @@ class _TodayBodyState extends ConsumerState<_TodayBody> {
             household: widget.household,
             draft: _draft!,
             onDraftChanged: (d) => setState(() => _draft = d),
+            rates: _rates,
+            onRatesChanged: _setRates,
             onGot: _logGot,
             onSkipped: _logSkipped,
             onCancel: entry == null
@@ -125,7 +157,7 @@ class _TodayBodyState extends ConsumerState<_TodayBody> {
             currentUid: ref.read(milkRepositoryProvider).currentUid,
             onChange: () => setState(() {
               _editing = true;
-              _draft = initialQuantities(widget.household, entry);
+              _startEditing(entry);
             }),
           ),
         const SizedBox(height: 16),
@@ -165,6 +197,8 @@ class _LogCard extends StatelessWidget {
     required this.household,
     required this.draft,
     required this.onDraftChanged,
+    required this.rates,
+    required this.onRatesChanged,
     required this.onGot,
     required this.onSkipped,
     required this.onCancel,
@@ -173,6 +207,8 @@ class _LogCard extends StatelessWidget {
   final Household household;
   final Map<String, int> draft;
   final ValueChanged<Map<String, int>> onDraftChanged;
+  final Map<String, int> rates;
+  final ValueChanged<Map<String, int>> onRatesChanged;
   final VoidCallback onGot;
   final VoidCallback onSkipped;
   final VoidCallback? onCancel;
@@ -194,6 +230,8 @@ class _LogCard extends StatelessWidget {
             products: household.products,
             quantitiesMl: draft,
             onChanged: onDraftChanged,
+            ratesPaise: rates,
+            onRatesChanged: onRatesChanged,
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
@@ -280,6 +318,19 @@ class _LoggedCard extends StatelessWidget {
               ),
             ],
           ),
+          for (final p in household.products)
+            if (got &&
+                entry.ratesPaise[p.id] != null &&
+                entry.ratesPaise[p.id] != p.ratePaise)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Text(
+                  '${household.products.length > 1 ? '${p.name}: ' : ''}'
+                  '${formatRupees(entry.ratesPaise[p.id]!)} per litre today '
+                  '(usually ${formatRupees(p.ratePaise)})',
+                  style: t.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
+                ),
+              ),
           if (got && household.products.length > 1) ...[
             const SizedBox(height: 12),
             for (final p in household.products)

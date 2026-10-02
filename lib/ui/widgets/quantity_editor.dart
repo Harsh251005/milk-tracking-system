@@ -4,11 +4,12 @@ import 'package:flutter/services.dart';
 import '../../domain/format.dart';
 import '../../domain/models.dart';
 import '../theme.dart';
+import 'price_input_dialog.dart';
 
 const qtyStepMl = 250;
 const _quickPicksMl = [500, 1000, 1500, 2000];
 
-/// One row per product: − [1½ L] + and quick-pick chips.
+/// One row per product: − [1½ L] + , quick-pick chips, and the price line.
 /// Used by Today, the day editor sheet and bulk edit.
 class QuantityEditor extends StatelessWidget {
   const QuantityEditor({
@@ -16,11 +17,17 @@ class QuantityEditor extends StatelessWidget {
     required this.products,
     required this.quantitiesMl,
     required this.onChanged,
+    required this.ratesPaise,
+    required this.onRatesChanged,
   });
 
   final List<Product> products;
   final Map<String, int> quantitiesMl;
   final ValueChanged<Map<String, int>> onChanged;
+
+  /// Price per litre for this log; may differ from the product's saved rate.
+  final Map<String, int> ratesPaise;
+  final ValueChanged<Map<String, int>> onRatesChanged;
 
   void _set(String productId, int ml) {
     HapticFeedback.selectionClick();
@@ -40,12 +47,6 @@ class QuantityEditor extends StatelessWidget {
               child: Row(
                 children: [
                   Text(p.name, style: Theme.of(context).textTheme.titleMedium),
-                  const Spacer(),
-                  Text(
-                    '${formatRupees(p.ratePaise)}/L',
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: context.colors.muted),
-                  ),
                 ],
               ),
             ),
@@ -57,6 +58,12 @@ class QuantityEditor extends StatelessWidget {
           _QuickPicks(
             selectedMl: quantitiesMl[p.id] ?? 0,
             onPick: (ml) => _set(p.id, ml),
+          ),
+          const SizedBox(height: 8),
+          _PriceLine(
+            product: p,
+            ratePaise: ratesPaise[p.id] ?? p.ratePaise,
+            onChanged: (paise) => onRatesChanged({...ratesPaise, p.id: paise}),
           ),
         ],
       ],
@@ -192,6 +199,73 @@ class _QuickPicks extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// "₹70 per litre · Change". Turns amber when this log's price differs
+/// from the saved one, with a one-tap way back.
+class _PriceLine extends StatelessWidget {
+  const _PriceLine({
+    required this.product,
+    required this.ratePaise,
+    required this.onChanged,
+  });
+
+  final Product product;
+  final int ratePaise;
+  final ValueChanged<int> onChanged;
+
+  Future<void> _edit(BuildContext context) async {
+    final paise = await showPriceInputDialog(
+      context,
+      productName: product.name,
+      currentPaise: ratePaise,
+    );
+    if (paise != null) onChanged(paise);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    final differs = ratePaise != product.ratePaise;
+    return Container(
+      padding: const EdgeInsets.only(left: 12),
+      decoration: BoxDecoration(
+        color: differs ? context.colors.missingSoft : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '${formatRupees(ratePaise)} per litre',
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  if (differs)
+                    TextSpan(
+                      text: '  (usually ${formatRupees(product.ratePaise)})',
+                      style: TextStyle(color: context.colors.muted),
+                    ),
+                ],
+              ),
+              style: t.bodyMedium,
+            ),
+          ),
+          if (differs)
+            TextButton(
+              onPressed: () => onChanged(product.ratePaise),
+              child: const Text('Reset'),
+            ),
+          TextButton(
+            onPressed: () => _edit(context),
+            child: const Text('Change'),
+          ),
+        ],
+      ),
     );
   }
 }
