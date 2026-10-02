@@ -1,4 +1,6 @@
 import 'package:milk_tracker/data/account_repository.dart';
+import 'package:milk_tracker/data/reminders.dart';
+import 'package:milk_tracker/domain/reminder.dart';
 import 'package:milk_tracker/domain/invite.dart';
 import 'package:milk_tracker/domain/models.dart';
 
@@ -40,4 +42,25 @@ class FakeAccountRepository implements AccountRepository {
   }) async {
     joined = (invite: invite, name: memberName);
   }
+}
+
+class FakeReminders implements Reminders {
+  FakeReminders({this.allowed = true});
+
+  /// What the phone answers when asked for notification permission.
+  final bool allowed;
+  ReminderSettings settings = const ReminderSettings();
+  List<DateTime> scheduled = const [];
+
+  @override
+  Future<ReminderSettings> load() async => settings;
+
+  @override
+  Future<void> save(ReminderSettings s) async => settings = s;
+
+  @override
+  Future<bool> requestPermission() async => allowed;
+
+  @override
+  Future<void> schedule(List<DateTime> times) async => scheduled = times;
 }

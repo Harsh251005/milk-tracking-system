@@ -9,6 +9,7 @@ import 'features/settings/settings_screen.dart';
 import 'features/setup/setup_screen.dart';
 import 'features/today/today_screen.dart';
 import 'state/providers.dart';
+import 'state/reminder_providers.dart';
 import 'ui/friendly_error.dart';
 import 'ui/theme.dart';
 import 'ui/widgets/status_views.dart';
@@ -101,6 +102,8 @@ class _HomeShellState extends ConsumerState<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    // Keeps reminders scheduled while the app runs; failures show in Settings.
+    ref.watch(reminderSyncProvider);
     return Scaffold(
       body: SafeArea(
         bottom: false,

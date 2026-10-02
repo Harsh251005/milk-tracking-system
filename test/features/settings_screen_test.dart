@@ -4,19 +4,30 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:milk_tracker/data/memory_milk_repository.dart';
 import 'package:milk_tracker/features/settings/settings_screen.dart';
 import 'package:milk_tracker/state/providers.dart';
+import 'package:milk_tracker/state/reminder_providers.dart';
 import 'package:milk_tracker/ui/theme.dart';
 
+import '../fakes.dart';
 import '../helpers.dart';
 
 void main() {
   late MemoryMilkRepository repo;
+  late FakeReminders reminders;
 
-  Future<void> pumpSettings(WidgetTester tester) async {
+  Future<void> pumpSettings(
+    WidgetTester tester, {
+    bool allowNotifications = true,
+  }) async {
     usePhoneScreen(tester);
     repo = MemoryMilkRepository.sample(today: DateTime(2026, 10, 2));
+    reminders = FakeReminders(allowed: allowNotifications);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [milkRepositoryProvider.overrideWithValue(repo)],
+        overrides: [
+          milkRepositoryProvider.overrideWithValue(repo),
+          remindersProvider.overrideWithValue(reminders),
+          todayProvider.overrideWithValue(DateTime(2026, 10, 2)),
+        ],
         child: MaterialApp(
           theme: buildTheme(),
           home: const Scaffold(body: SettingsScreen()),
@@ -94,5 +105,28 @@ void main() {
     expect(find.text('Dad'), findsNothing);
     final h = await repo.watchHousehold().first;
     expect(h.members.keys, ['mom']);
+  });
+
+  testWidgets('turning the reminder on schedules unlogged days', (
+    tester,
+  ) async {
+    await pumpSettings(tester);
+    expect(find.text('Off · tap to pick a time'), findsOneWidget);
+    await tapOn(tester, find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(reminders.settings.enabled, isTrue);
+    expect(find.textContaining('Every day at 10:00'), findsOneWidget);
+  });
+
+  testWidgets('blocked notifications explain how to allow them', (
+    tester,
+  ) async {
+    await pumpSettings(tester, allowNotifications: false);
+    await tapOn(tester, find.byType(Switch));
+    await tester.pumpAndSettle();
+
+    expect(reminders.settings.enabled, isFalse);
+    expect(find.textContaining('Notifications are blocked'), findsOneWidget);
   });
 }

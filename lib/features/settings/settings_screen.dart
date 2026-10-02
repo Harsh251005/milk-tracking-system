@@ -4,7 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/format.dart';
 import '../../domain/models.dart';
 import '../../domain/phone.dart';
+import '../../domain/reminder.dart';
 import '../../state/providers.dart';
+import '../../state/reminder_providers.dart';
+import '../../ui/friendly_error.dart';
 import '../../ui/theme.dart';
 import '../../ui/widgets/forms.dart';
 import '../../ui/widgets/section_card.dart';
@@ -62,6 +65,8 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => _editMilkman(context, h),
             ),
           ),
+          const SectionLabel('Reminder'),
+          const SectionCard(padding: EdgeInsets.zero, child: _ReminderRow()),
           const SectionLabel('Family'),
           SectionCard(
             padding: EdgeInsets.zero,
@@ -395,6 +400,108 @@ class _MilkmanSheetState extends ConsumerState<_MilkmanSheet> {
     ),
     onSave: _draft.isValid ? _save : null,
   );
+}
+
+class _ReminderRow extends ConsumerWidget {
+  const _ReminderRow();
+
+  Future<void> _toggle(
+    BuildContext context,
+    WidgetRef ref,
+    ReminderSettings s,
+    bool on,
+  ) async {
+    if (on && !await ref.read(remindersProvider).requestPermission()) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.error,
+          duration: const Duration(seconds: 8),
+          content: const Text(
+            'Notifications are blocked for Milk Tracker. Allow them in the '
+            "phone's Settings → Apps → Milk Tracker → Notifications.",
+          ),
+        ),
+      );
+      return;
+    }
+    await ref
+        .read(reminderSettingsProvider.notifier)
+        .set(s.copyWith(enabled: on));
+  }
+
+  Future<void> _pickTime(
+    BuildContext context,
+    WidgetRef ref,
+    ReminderSettings s,
+  ) async {
+    final t = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: s.hour, minute: s.minute),
+      helpText: 'Remind me at',
+    );
+    if (t == null) return;
+    final timed = s.copyWith(hour: t.hour, minute: t.minute);
+    await ref.read(reminderSettingsProvider.notifier).set(timed);
+    // Picking a time means "remind me": switch it on (asks permission).
+    if (!timed.enabled && context.mounted) {
+      await _toggle(context, ref, timed, true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final t = Theme.of(context).textTheme;
+    final settings = ref.watch(reminderSettingsProvider);
+    final sync = ref.watch(reminderSyncProvider);
+    final s = settings.value ?? const ReminderSettings();
+    final time = TimeOfDay(hour: s.hour, minute: s.minute).format(context);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(22),
+      onTap: () => _pickTime(context, ref, s),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 8, 14),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 22,
+              backgroundColor: scheme.primaryContainer,
+              child: Icon(Icons.notifications_rounded, color: scheme.primary),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Daily reminder', style: t.titleMedium),
+                  Text(
+                    s.enabled
+                        ? 'Every day at $time, if not logged yet'
+                        : 'Off · tap to pick a time',
+                    style: t.bodyMedium?.copyWith(color: context.colors.muted),
+                  ),
+                  if (sync.hasError)
+                    Text(
+                      "Couldn't set the reminder: "
+                      '${friendlyError(sync.error!).detail}',
+                      style: t.bodySmall?.copyWith(color: scheme.error),
+                    ),
+                ],
+              ),
+            ),
+            Switch(
+              value: s.enabled,
+              onChanged: settings.hasValue
+                  ? (on) => _toggle(context, ref, s, on)
+                  : null,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _Row extends StatelessWidget {
