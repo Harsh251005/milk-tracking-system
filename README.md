@@ -113,7 +113,7 @@ or write it, and a phone can add only itself, only with a live code.
 Test them against the local emulator, then deploy:
 ```bash
 cd tool/rules-test && npm install && npm test   # free, runs locally
-./tool/deploy_rules.sh                          # uses your gcloud login
+firebase deploy --only firestore:rules          # Firebase CLI, dharnidharkaharsh account
 ```
 
 ## Releasing an update
