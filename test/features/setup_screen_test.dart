@@ -16,7 +16,10 @@ void main() {
     account = FakeAccountRepository();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [accountRepositoryProvider.overrideWithValue(account)],
+        overrides: [
+          accountRepositoryProvider.overrideWithValue(account),
+          backupProvider.overrideWithValue(FakeBackup()),
+        ],
         child: MaterialApp(theme: buildTheme(), home: const SetupScreen()),
       ),
     );

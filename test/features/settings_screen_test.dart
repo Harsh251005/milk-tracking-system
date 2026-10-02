@@ -24,6 +24,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          backupProvider.overrideWithValue(FakeBackup()),
           milkRepositoryProvider.overrideWithValue(repo),
           remindersProvider.overrideWithValue(reminders),
           todayProvider.overrideWithValue(DateTime(2026, 10, 2)),

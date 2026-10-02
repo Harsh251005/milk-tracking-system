@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/account_repository.dart';
+import '../data/backup.dart';
 import '../data/firebase/firebase_account_repository.dart';
 import '../data/firebase/firestore_milk_repository.dart';
 import '../data/milk_repository.dart';
@@ -12,13 +13,26 @@ import 'clock.dart';
 
 // --- Session: who is this phone, and which household is it in? ------------
 
-/// Signs in anonymously on first launch; the account then persists on the
-/// phone. No login screen, no password.
-final signedInUidProvider = FutureProvider<String>((ref) async {
+/// The signed-in account on this phone. Signs in anonymously on first
+/// launch (no login screen). Follows sign-in changes, so restoring from a
+/// Google backup switches every provider below to the restored account.
+final signedInUidProvider = StreamProvider<String>((ref) async* {
   final auth = FirebaseAuth.instance;
-  final user = auth.currentUser ?? (await auth.signInAnonymously()).user!;
-  return user.uid;
+  await for (final user in auth.authStateChanges()) {
+    if (user == null) {
+      await auth.signInAnonymously(); // the next event carries the new user
+    } else {
+      yield user.uid;
+    }
+  }
 });
+
+final backupProvider = Provider<Backup>((ref) => GoogleBackup());
+
+/// Email this account is backed up to, or null if not backed up yet.
+final backupEmailProvider = StreamProvider<String?>(
+  (ref) => ref.watch(backupProvider).watchEmail(),
+);
 
 final accountRepositoryProvider = Provider<AccountRepository>(
   (ref) => FirebaseAccountRepository(

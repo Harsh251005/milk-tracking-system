@@ -15,6 +15,7 @@ import '../../ui/widgets/quantity_editor.dart';
 import '../../ui/widgets/section_card.dart';
 import '../../ui/widgets/status_views.dart';
 import '../away/away_sheet.dart';
+import '../backup/backup_actions.dart';
 import '../logging/log_got.dart';
 import '../share/share_screen.dart';
 
@@ -193,6 +194,7 @@ class _TodayBodyState extends ConsumerState<_TodayBody> {
           icon: const Icon(Icons.luggage_rounded),
           label: const Text('Going away?'),
         ),
+        const BackupNudge(),
       ],
     );
   }

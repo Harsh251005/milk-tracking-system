@@ -7,6 +7,7 @@ import 'package:milk_tracker/features/today/today_screen.dart';
 import 'package:milk_tracker/state/providers.dart';
 import 'package:milk_tracker/ui/theme.dart';
 
+import '../fakes.dart';
 import '../helpers.dart';
 
 void main() {
@@ -20,6 +21,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          backupProvider.overrideWithValue(FakeBackup()),
           milkRepositoryProvider.overrideWithValue(repo),
           todayProvider.overrideWithValue(today),
         ],
@@ -134,6 +136,7 @@ void main() {
     repo = MemoryMilkRepository.sample(today: today);
     final container = ProviderContainer(
       overrides: [
+        backupProvider.overrideWithValue(FakeBackup()),
         milkRepositoryProvider.overrideWithValue(repo),
         todayProvider.overrideWith((ref) => ref.watch(_testDay)),
       ],

@@ -7,6 +7,7 @@ import '../../ui/friendly_error.dart';
 import '../../ui/theme.dart';
 import '../../ui/widgets/forms.dart';
 import '../../ui/widgets/section_card.dart';
+import '../backup/backup_actions.dart';
 import '../join/join_screen.dart';
 
 /// First run: name -> milk -> milkman (skippable). Creates the household.
@@ -279,10 +280,37 @@ class _NameStep extends StatelessWidget {
                 icon: const Icon(Icons.group_add_rounded),
                 label: const Text('Join their tracker'),
               ),
+              const SizedBox(height: 4),
+              const _RestoreButton(),
             ],
           ),
         ),
       ],
     );
   }
+}
+
+/// For a new or reset phone whose log was backed up to Google.
+class _RestoreButton extends ConsumerStatefulWidget {
+  const _RestoreButton();
+
+  @override
+  ConsumerState<_RestoreButton> createState() => _RestoreButtonState();
+}
+
+class _RestoreButtonState extends ConsumerState<_RestoreButton> {
+  bool _busy = false;
+
+  @override
+  Widget build(BuildContext context) => TextButton.icon(
+    onPressed: _busy
+        ? null
+        : () async {
+            setState(() => _busy = true);
+            await runRestore(context, ref);
+            if (mounted) setState(() => _busy = false);
+          },
+    icon: const Icon(Icons.cloud_download_rounded),
+    label: Text(_busy ? 'Restoring…' : 'New phone? Restore with Google'),
+  );
 }

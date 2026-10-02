@@ -12,6 +12,7 @@ import '../../ui/theme.dart';
 import '../../ui/widgets/forms.dart';
 import '../../ui/widgets/section_card.dart';
 import '../../ui/widgets/status_views.dart';
+import '../backup/backup_actions.dart';
 import '../family/invite_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -105,6 +106,8 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
+          const SectionLabel('Backup'),
+          const SectionCard(padding: EdgeInsets.zero, child: _BackupRow()),
         ],
       ),
     );
@@ -400,6 +403,29 @@ class _MilkmanSheetState extends ConsumerState<_MilkmanSheet> {
     ),
     onSave: _draft.isValid ? _save : null,
   );
+}
+
+class _BackupRow extends ConsumerWidget {
+  const _BackupRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final email = ref.watch(backupEmailProvider).value;
+    return email == null
+        ? _Row(
+            icon: Icons.cloud_upload_rounded,
+            title: 'Back up with Google',
+            subtitle: 'Get your log back on a new or reset phone',
+            onTap: () => runBackup(context, ref),
+          )
+        : _Row(
+            icon: Icons.cloud_done_rounded,
+            title: 'Backed up',
+            subtitle:
+                '$email · restore it on a new phone from the '
+                'welcome screen',
+          );
+  }
 }
 
 class _ReminderRow extends ConsumerWidget {

@@ -8,6 +8,7 @@ import 'package:milk_tracker/state/providers.dart';
 import 'package:milk_tracker/ui/theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../fakes.dart';
 import '../helpers.dart';
 
 void main() {
@@ -18,6 +19,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          backupProvider.overrideWithValue(FakeBackup()),
           milkRepositoryProvider.overrideWithValue(
             MemoryMilkRepository.sample(today: today),
           ),

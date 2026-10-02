@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:milk_tracker/data/account_repository.dart';
+import 'package:milk_tracker/data/backup.dart';
 import 'package:milk_tracker/data/reminders.dart';
 import 'package:milk_tracker/domain/reminder.dart';
 import 'package:milk_tracker/domain/invite.dart';
@@ -63,4 +66,34 @@ class FakeReminders implements Reminders {
 
   @override
   Future<void> schedule(List<DateTime> times) async => scheduled = times;
+}
+
+class FakeBackup implements Backup {
+  FakeBackup({String? email, this.fail}) : _current = email;
+
+  /// When set, backUp/restore throw this message.
+  final String? fail;
+  final _email = StreamController<String?>.broadcast();
+  String? _current;
+  int restores = 0;
+
+  @override
+  Stream<String?> watchEmail() async* {
+    yield _current;
+    yield* _email.stream;
+  }
+
+  @override
+  Future<String> backUp() async {
+    if (fail != null) throw BackupException(fail!);
+    _current = 'mom@gmail.com';
+    _email.add(_current);
+    return _current!;
+  }
+
+  @override
+  Future<void> restore() async {
+    if (fail != null) throw BackupException(fail!);
+    restores++;
+  }
 }
