@@ -103,9 +103,13 @@ class _RateChoiceDialog extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
-                  '${changes.length > 1 ? '${c.product.name}: ' : ''}'
-                  'usually ${formatRupees(c.product.ratePaise)} per litre, '
-                  'now ${formatRupees(c.newRatePaise)}.',
+                  changes.length > 1
+                      ? '${c.product.name}: usually '
+                            '${formatRupees(c.product.ratePaise)}, '
+                            'now ${formatRupees(c.newRatePaise)}.'
+                      : 'You usually pay ${formatRupees(c.product.ratePaise)} '
+                            "per litre. This time it's "
+                            '${formatRupees(c.newRatePaise)}.',
                   textAlign: TextAlign.center,
                   style: t.bodyLarge,
                 ),
