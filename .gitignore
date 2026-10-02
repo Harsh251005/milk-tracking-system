@@ -54,3 +54,6 @@ android/key.properties
 
 # Local env
 .env
+
+# Kotlin compiler daemon state
+android/.kotlin/
