@@ -68,4 +68,18 @@ void main() {
 
     expect(find.text('+91 91234 56789'), findsOneWidget);
   });
+
+  testWidgets('renaming yourself saves without errors', (tester) async {
+    await pumpSettings(tester);
+    await tapOn(tester, find.text('Mom'));
+    await tester.pumpAndSettle();
+    await typeInto(tester, find.byType(TextField), 'Harsh');
+    await tapOn(tester, find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text('Harsh'), findsOneWidget);
+    final h = await repo.watchHousehold().first;
+    expect(h.members['mom'], 'Harsh');
+  });
 }
