@@ -19,6 +19,9 @@ abstract interface class MilkRepository {
 
   Future<void> clearDays(List<DateTime> days);
 
+  /// Changes saved prices from now on. Past entries keep their own rates.
+  Future<void> updateProductRates(Map<String, int> ratesPaise);
+
   /// Pass null to mark the month unpaid again.
   Future<void> setPayment(YearMonth month, MonthPayment? payment);
 }

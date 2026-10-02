@@ -128,6 +128,28 @@ class MemoryMilkRepository implements MilkRepository {
   }
 
   @override
+  Future<void> updateProductRates(Map<String, int> ratesPaise) async {
+    final h = _household;
+    _household = Household(
+      id: h.id,
+      name: h.name,
+      members: h.members,
+      milkmanName: h.milkmanName,
+      milkmanPhone: h.milkmanPhone,
+      products: [
+        for (final p in h.products)
+          Product(
+            id: p.id,
+            name: p.name,
+            ratePaise: ratesPaise[p.id] ?? p.ratePaise,
+            usualMl: p.usualMl,
+          ),
+      ],
+    );
+    _changes.add(null);
+  }
+
+  @override
   Future<void> setPayment(YearMonth month, MonthPayment? payment) async {
     if (payment == null) {
       _payments.remove(_monthKey(month));
