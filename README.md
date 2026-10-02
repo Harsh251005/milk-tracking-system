@@ -8,10 +8,9 @@ Two phones in one household stay in sync.
 distribution via GitHub Releases — no Play Store.
 
 ## Status
-M3 — daily logging verified offline. Each phone signs in anonymously (no
-login screen). Logs made in airplane mode survive an app restart and sync to
-the server within seconds of reconnecting. Pairing a second phone into the
-same household arrives in M5.
+M5 — family sync. Phones in one household see and log the same days live.
+Each phone signs in anonymously (no login screen); logging works offline and
+syncs within seconds of reconnecting.
 
 ## What it does today
 - **Today:** usual quantity prefilled; one tap logs "Got 1 L" or "No milk today".
@@ -27,6 +26,9 @@ same household arrives in M5.
   usual quantity), and the milkman's WhatsApp number (skippable).
 - **Settings:** edit milk type, price and usual quantity; add or remove milk
   types; edit the milkman; change your display name.
+- **Family:** Settings → Family → *Add a family member* shows a QR code and
+  a 6-digit code (valid 24 h). On the other phone, *Join their tracker* scans
+  or types it. Old or lost phones can be removed from the family.
 - **Always today:** the date refreshes at midnight and when the app returns
   from the background, so an app left open overnight never logs to yesterday.
 - **Errors are loud:** a save the server rejects shows a red banner with the
@@ -58,12 +60,18 @@ fallback in the theme.
 Project `milk-tracker-hd` (free Spark plan, Firestore in `asia-south1`).
 ```
 users/{uid}                         -> {householdId}
+joinCodes/{6 digits}                -> householdId, invitedBy, expiresAt
 households/{id}                     -> members, products, milkman
 households/{id}/entries/{yyyy-MM-dd}
 households/{id}/payments/{yyyy-MM}
 ```
 Access rules live in `firestore.rules`: only a household's members can read
-or write it. Deploy with `tool/deploy_rules.sh` (uses your gcloud login).
+or write it, and a phone can add only itself, only with a live code.
+Test them against the local emulator, then deploy:
+```bash
+cd tool/rules-test && npm install && npm test   # free, runs locally
+./tool/deploy_rules.sh                          # uses your gcloud login
+```
 
 ## Release (later milestones)
 `flutter build apk --release`, signed with a local keystore that is never
