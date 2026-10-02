@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:ffi';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:open_filex/open_filex.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../domain/release.dart';
 import '../links.dart';
@@ -12,6 +15,22 @@ abstract interface class Updates {
 
   /// Newest published release, or null if none / offline.
   Future<AppRelease?> latest();
+
+  /// Downloads [release]'s APK (reporting 0–1 progress) and opens Android's
+  /// installer on it. Throws [UpdateException] with a plain message.
+  Future<void> downloadAndInstall(
+    AppRelease release, {
+    required void Function(double progress) onProgress,
+  });
+}
+
+class UpdateException implements Exception {
+  const UpdateException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
 }
 
 class GitHubUpdates implements Updates {
@@ -47,4 +66,51 @@ class GitHubUpdates implements Updates {
     Abi.androidX64 => 'x86_64',
     _ => null,
   };
+
+  @override
+  Future<void> downloadAndInstall(
+    AppRelease release, {
+    required void Function(double progress) onProgress,
+  }) async {
+    final file = File('${(await getTemporaryDirectory()).path}/update.apk');
+    final client = http.Client();
+    try {
+      final res = await client
+          .send(http.Request('GET', Uri.parse(release.apkUrl)))
+          .timeout(const Duration(seconds: 20));
+      if (res.statusCode != 200) {
+        throw UpdateException(
+          "Couldn't download the update (error ${res.statusCode}).",
+        );
+      }
+      final total = res.contentLength ?? 0;
+      var received = 0;
+      final sink = file.openWrite();
+      await for (final chunk in res.stream.timeout(
+        const Duration(seconds: 30),
+      )) {
+        sink.add(chunk);
+        received += chunk.length;
+        if (total > 0) onProgress(received / total);
+      }
+      await sink.close();
+    } on UpdateException {
+      rethrow;
+    } on Exception {
+      throw const UpdateException(
+        'The download stopped. Check the internet and try again.',
+      );
+    } finally {
+      client.close();
+    }
+    // Android asks once to "allow installs from Milk Tracker", then shows
+    // its Update screen. Data is kept: same app, same signing key.
+    final opened = await OpenFilex.open(
+      file.path,
+      type: 'application/vnd.android.package-archive',
+    );
+    if (opened.type != ResultType.done) {
+      throw UpdateException("Couldn't open the installer (${opened.message}).");
+    }
+  }
 }

@@ -111,4 +111,18 @@ class FakeUpdates implements Updates {
 
   @override
   Future<AppRelease?> latest() async => published;
+
+  /// When set, downloadAndInstall fails with this message.
+  String? failWith;
+  int installs = 0;
+
+  @override
+  Future<void> downloadAndInstall(
+    AppRelease release, {
+    required void Function(double progress) onProgress,
+  }) async {
+    onProgress(0.5);
+    if (failWith != null) throw UpdateException(failWith!);
+    installs++;
+  }
 }

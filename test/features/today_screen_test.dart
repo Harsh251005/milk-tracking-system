@@ -211,6 +211,41 @@ void main() {
     expect(find.text('Update available · version 1.0.1'), findsOneWidget);
   });
 
+  testWidgets('Update downloads in the app; a failure says why', (
+    tester,
+  ) async {
+    usePhoneScreen(tester);
+    final updates = FakeUpdates(
+      installed: '1.0.0',
+      published: const AppRelease(version: '1.0.1', apkUrl: 'u'),
+    )..failWith = 'The download stopped. Check the internet and try again.';
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          milkRepositoryProvider.overrideWithValue(
+            MemoryMilkRepository.sample(today: today),
+          ),
+          todayProvider.overrideWithValue(today),
+          backupProvider.overrideWithValue(FakeBackup()),
+          updatesProvider.overrideWithValue(updates),
+        ],
+        child: MaterialApp(
+          theme: buildTheme(),
+          home: Scaffold(body: TodayScreen(onOpenMonth: () {})),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Update'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('The download stopped'), findsOneWidget);
+
+    updates.failWith = null;
+    await tester.tap(find.text('Try again'));
+    await tester.pumpAndSettle();
+    expect(updates.installs, 1);
+  });
+
   testWidgets('no banner when up to date', (tester) async {
     await pumpToday(tester);
     expect(find.textContaining('Update available'), findsNothing);
