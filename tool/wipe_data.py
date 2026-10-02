@@ -1,9 +1,12 @@
-"""Deletes ALL app data in Firebase project milk-tracker-hd: every Firestore
-document (households, entries, payments, users, joinCodes) and every
-sign-in account. Used once, right before handing the app to the family.
+"""Counts the app data in Firebase project milk-tracker-hd (documents by
+kind, and sign-in accounts).
 
-    python tool/wipe_data.py          # dry run: shows what would be deleted
-    python tool/wipe_data.py --yes    # actually deletes (cannot be undone)
+    python tool/wipe_data.py
+
+DELETING IS PERMANENTLY DISABLED. Since 2026-10-03 this project holds the
+family's real milk logs; the owner asked that it never be wiped again, even
+on request. For testing, use a separate throwaway household or a separate
+Firebase project instead.
 
 Authenticates with your gcloud login (the project owner), so it bypasses
 the security rules. Standard library only.
@@ -84,9 +87,11 @@ def main():
     for k, v in sorted(by_kind.items()):
         print(f"  {k}: {v}")
     print(f"Sign-in accounts: {len(uids)}")
-    if not confirm:
-        print("\nDry run. Nothing deleted. Re-run with --yes to delete all of the above.")
-        return
+    if confirm:
+        sys.exit("\nRefused: this project holds real family data. Deleting is "
+                 "disabled permanently (see the note at the top of this file).")
+    print("\nRead-only count. Nothing was deleted.")
+    return
     for p in paths:
         call("DELETE", f"{DOCS}/{p}")
     for i in range(0, len(uids), 1000):

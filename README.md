@@ -133,4 +133,5 @@ update. Its SHA-1 is registered with Firebase for Google sign-in.
 Release builds strip resources only referenced by name; anything like that
 must be listed in `android/app/src/main/res/raw/keep.xml`.
 
-`tool/wipe_data.py` deletes all Firebase data (dry run unless `--yes`).
+`tool/wipe_data.py` counts what is in Firebase. Deleting is disabled for good:
+the project holds real family data. Test on a throwaway household instead.
