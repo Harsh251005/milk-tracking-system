@@ -8,8 +8,9 @@ Two phones in one household stay in sync.
 distribution via GitHub Releases — no Play Store.
 
 ## Status
-M1 — real screens (Today, Month, Settings) running on in-memory sample data.
-Nothing is saved yet; Firestore arrives in M3.
+M2 — first-run setup and live data in Firestore. Each phone signs in
+anonymously (no login screen); data syncs and works offline. Pairing a second
+phone into the same household arrives in M5.
 
 ## What it does today
 - **Today:** usual quantity prefilled; one tap logs "Got 1 L" or "No milk today".
@@ -21,12 +22,18 @@ Nothing is saved yet; Firestore arrives in M3.
   day, or several days at once) can use a different price via "Change". If it
   differs from the saved one, the app explains and asks: only for these days,
   use it from now on, or keep the saved price. Logged days keep their own price.
-- **Settings:** milk type and rate, milkman, family members (read-only for now).
+- **First run:** three short steps — your name, your milk (type, price,
+  usual quantity), and the milkman's WhatsApp number (skippable).
+- **Settings:** edit milk type, price and usual quantity; add or remove milk
+  types; edit the milkman; change your display name.
+- **Errors are loud:** a save the server rejects shows a red banner with the
+  reason; it never fails silently.
 
 ## Layout
 ```
 lib/domain/    pure Dart: models, billing, formatting, entry builders (unit-tested)
-lib/data/      MilkRepository interface + in-memory implementation
+lib/data/      MilkRepository / AccountRepository interfaces, Firestore
+               implementation (firebase/), in-memory version for tests
 lib/state/     Riverpod providers — the one place the backend is chosen
 lib/ui/        theme tokens and shared widgets
 lib/features/  today/, month/, settings/
@@ -43,6 +50,17 @@ flutter test
 Font: Nunito (SIL Open Font License, `assets/fonts/OFL.txt`), bundled in two
 subsets — `latin` for ½ ¼ ¾ and `latin-ext` for ₹ — with the second set as a
 fallback in the theme.
+
+## Firebase
+Project `milk-tracker-hd` (free Spark plan, Firestore in `asia-south1`).
+```
+users/{uid}                         -> {householdId}
+households/{id}                     -> members, products, milkman
+households/{id}/entries/{yyyy-MM-dd}
+households/{id}/payments/{yyyy-MM}
+```
+Access rules live in `firestore.rules`: only a household's members can read
+or write it. Deploy with `tool/deploy_rules.sh` (uses your gcloud login).
 
 ## Release (later milestones)
 `flutter build apk --release`, signed with a local keystore that is never
