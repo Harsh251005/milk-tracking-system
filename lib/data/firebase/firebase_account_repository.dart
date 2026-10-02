@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../domain/invite.dart';
 import '../../domain/models.dart';
 import '../account_repository.dart';
 import 'codec.dart';
@@ -44,4 +47,40 @@ class FirebaseAccountRepository implements AccountRepository {
     await batch.commit().timeout(const Duration(seconds: 15), onTimeout: () {});
     return household.id;
   }
+
+  @override
+  Future<Invite?> findInvite(String code) async {
+    final snap = await _db
+        .collection('joinCodes')
+        .doc(code)
+        .get(const GetOptions(source: Source.server))
+        .timeout(const Duration(seconds: 15), onTimeout: _noInternet);
+    final data = snap.data();
+    return data == null ? null : inviteFromMap(code, data);
+  }
+
+  @override
+  Future<void> joinHousehold({
+    required Invite invite,
+    required String memberName,
+  }) async {
+    final household = _db.collection('households').doc(invite.householdId);
+    final batch = _db.batch()
+      // The rules check lastJoinCode against joinCodes/ to allow this.
+      ..update(household, {
+        'members.$uid': memberName,
+        'lastJoinCode': invite.code,
+      })
+      ..set(_user, {'householdId': invite.householdId});
+    await batch.commit().timeout(
+      const Duration(seconds: 15),
+      onTimeout: _noInternet,
+    );
+  }
+
+  static Never _noInternet() => throw FirebaseException(
+    plugin: 'cloud_firestore',
+    code: 'unavailable',
+    message: 'Joining needs internet.',
+  );
 }

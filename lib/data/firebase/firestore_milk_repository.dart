@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/dates.dart';
+import '../../domain/invite.dart';
 import '../../domain/models.dart';
 import '../milk_repository.dart';
 import 'codec.dart';
@@ -102,7 +103,41 @@ class FirestoreMilkRepository implements MilkRepository {
       _update({'milkman': milkmanToMap(name, phone)});
 
   @override
+  Future<void> removeMember(String uid) =>
+      _update({'members.$uid': FieldValue.delete()});
+
+  @override
   Future<void> setMyName(String name) => _update({'members.$currentUid': name});
+
+  @override
+  Future<Invite> createInvite({required String invitedBy}) async {
+    // A code that's already taken is rejected by the rules (create-only),
+    // so pick another. Six digits make a clash rare.
+    for (var attempt = 0; ; attempt++) {
+      final invite = Invite(
+        code: newInviteCode(),
+        householdId: householdId,
+        invitedBy: invitedBy,
+        expiresAt: DateTime.now().add(inviteLifetime),
+      );
+      try {
+        await _db
+            .collection('joinCodes')
+            .doc(invite.code)
+            .set(inviteToMap(invite, createdBy: currentUid))
+            .timeout(const Duration(seconds: 15));
+        return invite;
+      } on FirebaseException catch (e) {
+        if (e.code != 'permission-denied' || attempt >= 4) rethrow;
+      } on TimeoutException {
+        throw FirebaseException(
+          plugin: 'cloud_firestore',
+          code: 'unavailable',
+          message: 'Making a family code needs internet.',
+        );
+      }
+    }
+  }
 
   @override
   Future<void> setPayment(YearMonth month, MonthPayment? payment) {

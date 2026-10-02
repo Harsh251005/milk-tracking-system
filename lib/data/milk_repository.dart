@@ -1,4 +1,5 @@
 import '../domain/dates.dart';
+import '../domain/invite.dart';
 import '../domain/models.dart';
 
 /// Everything the screens need from storage. Screens depend only on this
@@ -34,8 +35,14 @@ abstract interface class MilkRepository {
 
   Future<void> setMilkman({String? name, String? phone});
 
+  /// Unlinks another phone (e.g. an old or lost one). Its logs stay.
+  Future<void> removeMember(String uid);
+
   /// Display name of the member on this phone.
   Future<void> setMyName(String name);
+
+  /// A code another phone can use to join this household. Needs internet.
+  Future<Invite> createInvite({required String invitedBy});
 
   /// Pass null to mark the month unpaid again.
   Future<void> setPayment(YearMonth month, MonthPayment? payment);

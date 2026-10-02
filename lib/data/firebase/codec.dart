@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/dates.dart';
+import '../../domain/invite.dart';
 import '../../domain/models.dart';
 
 /// Firestore document <-> model conversion. Pure functions, unit-tested.
@@ -91,3 +92,17 @@ String monthKey(YearMonth m) =>
 
 Map<String, int> _intMap(Object? raw) => (raw as Map<String, dynamic>? ?? {})
     .map((k, v) => MapEntry(k, (v as num).toInt()));
+
+Map<String, dynamic> inviteToMap(Invite i, {required String createdBy}) => {
+  'householdId': i.householdId,
+  'invitedBy': i.invitedBy,
+  'createdBy': createdBy,
+  'expiresAt': Timestamp.fromDate(i.expiresAt),
+};
+
+Invite inviteFromMap(String code, Map<String, dynamic> d) => Invite(
+  code: code,
+  householdId: d['householdId'] as String,
+  invitedBy: d['invitedBy'] as String? ?? 'your family',
+  expiresAt: (d['expiresAt'] as Timestamp).toDate(),
+);

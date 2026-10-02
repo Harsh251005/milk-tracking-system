@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../domain/billing.dart';
 import '../domain/dates.dart';
+import '../domain/invite.dart';
 import '../domain/models.dart';
 import 'milk_repository.dart';
 
@@ -183,8 +184,20 @@ class MemoryMilkRepository implements MilkRepository {
       _updateHousehold(milkmanName: () => name, milkmanPhone: () => phone);
 
   @override
+  Future<void> removeMember(String uid) async =>
+      _updateHousehold(members: {..._household.members}..remove(uid));
+
+  @override
   Future<void> setMyName(String name) async =>
       _updateHousehold(members: {..._household.members, currentUid: name});
+
+  @override
+  Future<Invite> createInvite({required String invitedBy}) async => Invite(
+    code: '482913',
+    householdId: _household.id,
+    invitedBy: invitedBy,
+    expiresAt: DateTime.now().add(inviteLifetime),
+  );
 
   @override
   Future<void> setPayment(YearMonth month, MonthPayment? payment) async {
