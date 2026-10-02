@@ -37,4 +37,21 @@ void main() {
     );
     expect(initialQuantities(household, existing), {'cow': 2000, 'curd': 0});
   });
+
+  test('entries keep the logger name after they leave the family', () {
+    final e = skippedEntry(
+      date: DateTime(2026, 10, 2),
+      household: household,
+      byUid: 'mom',
+      now: DateTime(2026, 10, 2),
+    );
+    expect(household.loggedBy(e), 'Mom');
+    const after = Household(
+      id: 'h',
+      name: 'Home',
+      products: [],
+      members: {'dad': 'Dad'},
+    );
+    expect(after.loggedBy(e), 'Mom');
+  });
 }

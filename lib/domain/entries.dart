@@ -24,12 +24,14 @@ DayEntry gotEntry({
         if (quantities.containsKey(p.id)) p.id: ratesPaise[p.id] ?? p.ratePaise,
     },
     byUid: byUid,
+    byName: household.members[byUid],
     at: now,
   );
 }
 
 DayEntry skippedEntry({
   required DateTime date,
+  required Household household,
   required String byUid,
   required DateTime now,
 }) => DayEntry(
@@ -38,6 +40,7 @@ DayEntry skippedEntry({
   quantitiesMl: const {},
   ratesPaise: const {},
   byUid: byUid,
+  byName: household.members[byUid],
   at: now,
 );
 

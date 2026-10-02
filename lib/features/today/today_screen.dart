@@ -15,6 +15,7 @@ import '../../ui/widgets/quantity_editor.dart';
 import '../../ui/widgets/section_card.dart';
 import '../../ui/widgets/status_views.dart';
 import '../logging/log_got.dart';
+import '../share/share_screen.dart';
 
 class TodayScreen extends ConsumerWidget {
   const TodayScreen({super.key, required this.onOpenMonth});
@@ -117,6 +118,7 @@ class _TodayBodyState extends ConsumerState<_TodayBody> {
     await repo.saveEntries([
       skippedEntry(
         date: widget.today,
+        household: widget.household,
         byUid: repo.currentUid,
         now: DateTime.now(),
       ),
@@ -169,6 +171,20 @@ class _TodayBodyState extends ConsumerState<_TodayBody> {
           summary: summary,
           today: widget.today,
           onOpenMonth: widget.onOpenMonth,
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => ShareScreen(
+                // Once today is logged, telling him about it is most likely;
+                // before that, ordering for tomorrow is.
+                kind: entry == null ? MessageKind.tomorrow : MessageKind.today,
+              ),
+            ),
+          ),
+          icon: const Icon(Icons.chat_rounded),
+          label: const Text('Message milkman'),
         ),
       ],
     );
@@ -278,9 +294,7 @@ class _LoggedCard extends StatelessWidget {
     final t = Theme.of(context).textTheme;
     final got = entry.status == DayStatus.got;
     final accent = got ? context.colors.got : context.colors.skipped;
-    final who = entry.byUid == currentUid
-        ? 'you'
-        : household.memberName(entry.byUid);
+    final who = entry.byUid == currentUid ? 'you' : household.loggedBy(entry);
     final when = DateFormat('h:mm a').format(entry.at).toLowerCase();
 
     return SectionCard(

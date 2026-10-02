@@ -63,6 +63,7 @@ Map<String, dynamic> entryToMap(DayEntry e) => {
   'quantitiesMl': e.quantitiesMl,
   'ratesPaise': e.ratesPaise,
   'byUid': e.byUid,
+  'byName': ?e.byName,
   'at': Timestamp.fromDate(e.at),
 };
 
@@ -72,6 +73,7 @@ DayEntry entryFromMap(Map<String, dynamic> d) => DayEntry(
   quantitiesMl: _intMap(d['quantitiesMl']),
   ratesPaise: _intMap(d['ratesPaise']),
   byUid: d['byUid'] as String,
+  byName: d['byName'] as String?,
   at: (d['at'] as Timestamp).toDate(),
 );
 

@@ -117,7 +117,12 @@ class _EntrySheetState extends ConsumerState<_EntrySheet> {
             onPressed: () => _apply(
               () => repo.saveEntries([
                 for (final d in widget.days)
-                  skippedEntry(date: d, byUid: repo.currentUid, now: now),
+                  skippedEntry(
+                    date: d,
+                    household: widget.household,
+                    byUid: repo.currentUid,
+                    now: now,
+                  ),
               ]),
             ),
             icon: const Icon(Icons.block_rounded),

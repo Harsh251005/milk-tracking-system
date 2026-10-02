@@ -60,6 +60,10 @@ class Household {
   final String? milkmanPhone;
 
   String memberName(String uid) => members[uid] ?? 'Someone';
+
+  /// Who logged [e]: their current name, or the name saved on the entry if
+  /// that phone has since been removed from the family.
+  String loggedBy(DayEntry e) => members[e.byUid] ?? e.byName ?? 'Someone';
 }
 
 /// One calendar day's record. A day with no entry is "not logged".
@@ -71,6 +75,7 @@ class DayEntry {
     required this.ratesPaise,
     required this.byUid,
     required this.at,
+    this.byName,
   });
 
   /// Local calendar date, time part zero.
@@ -84,6 +89,9 @@ class DayEntry {
   /// changes never rewrite past bills.
   final Map<String, int> ratesPaise;
   final String byUid;
+
+  /// Logger's display name when it was logged; outlives their membership.
+  final String? byName;
   final DateTime at;
 
   int get totalMl => quantitiesMl.values.fold(0, (a, b) => a + b);
