@@ -8,6 +8,10 @@ abstract interface class MilkRepository {
   /// The signed-in member on this phone.
   String get currentUid;
 
+  /// Writes return before the server confirms (so the app works offline).
+  /// A write the server later rejects is reported here.
+  Stream<Object> get writeErrors;
+
   Stream<Household> watchHousehold();
 
   Stream<List<DayEntry>> watchMonth(YearMonth month);
@@ -21,6 +25,17 @@ abstract interface class MilkRepository {
 
   /// Changes saved prices from now on. Past entries keep their own rates.
   Future<void> updateProductRates(Map<String, int> ratesPaise);
+
+  /// Adds the product, or replaces the one with the same id.
+  Future<void> saveProduct(Product product);
+
+  /// Past entries keep their quantities and prices for this product.
+  Future<void> removeProduct(String productId);
+
+  Future<void> setMilkman({String? name, String? phone});
+
+  /// Display name of the member on this phone.
+  Future<void> setMyName(String name);
 
   /// Pass null to mark the month unpaid again.
   Future<void> setPayment(YearMonth month, MonthPayment? payment);

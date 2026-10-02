@@ -39,6 +39,9 @@ class MemoryMilkRepository implements MilkRepository {
   @override
   String get currentUid => 'mom';
 
+  @override
+  Stream<Object> get writeErrors => const Stream.empty();
+
   void _seed(DateTime today, Product cow) {
     final t = dateOnly(today);
     final thisMonth = monthOf(t);
@@ -127,27 +130,61 @@ class MemoryMilkRepository implements MilkRepository {
     _changes.add(null);
   }
 
-  @override
-  Future<void> updateProductRates(Map<String, int> ratesPaise) async {
+  void _updateHousehold({
+    List<Product>? products,
+    Map<String, String>? members,
+    String? Function()? milkmanName,
+    String? Function()? milkmanPhone,
+  }) {
     final h = _household;
     _household = Household(
       id: h.id,
       name: h.name,
-      members: h.members,
-      milkmanName: h.milkmanName,
-      milkmanPhone: h.milkmanPhone,
-      products: [
-        for (final p in h.products)
-          Product(
-            id: p.id,
-            name: p.name,
-            ratePaise: ratesPaise[p.id] ?? p.ratePaise,
-            usualMl: p.usualMl,
-          ),
-      ],
+      products: products ?? h.products,
+      members: members ?? h.members,
+      milkmanName: milkmanName == null ? h.milkmanName : milkmanName(),
+      milkmanPhone: milkmanPhone == null ? h.milkmanPhone : milkmanPhone(),
     );
     _changes.add(null);
   }
+
+  @override
+  Future<void> updateProductRates(Map<String, int> ratesPaise) async =>
+      _updateHousehold(
+        products: [
+          for (final p in _household.products)
+            p.copyWith(ratePaise: ratesPaise[p.id]),
+        ],
+      );
+
+  @override
+  Future<void> saveProduct(Product product) async {
+    final exists = _household.products.any((p) => p.id == product.id);
+    _updateHousehold(
+      products: exists
+          ? [
+              for (final p in _household.products)
+                p.id == product.id ? product : p,
+            ]
+          : [..._household.products, product],
+    );
+  }
+
+  @override
+  Future<void> removeProduct(String productId) async => _updateHousehold(
+    products: [
+      for (final p in _household.products)
+        if (p.id != productId) p,
+    ],
+  );
+
+  @override
+  Future<void> setMilkman({String? name, String? phone}) async =>
+      _updateHousehold(milkmanName: () => name, milkmanPhone: () => phone);
+
+  @override
+  Future<void> setMyName(String name) async =>
+      _updateHousehold(members: {..._household.members, currentUid: name});
 
   @override
   Future<void> setPayment(YearMonth month, MonthPayment? payment) async {
@@ -156,12 +193,6 @@ class MemoryMilkRepository implements MilkRepository {
     } else {
       _payments[_monthKey(month)] = payment;
     }
-    _changes.add(null);
-  }
-
-  /// Test helper.
-  void replaceHousehold(Household h) {
-    _household = h;
     _changes.add(null);
   }
 }
