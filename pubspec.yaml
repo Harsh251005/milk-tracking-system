@@ -38,6 +38,7 @@ dependencies:
   firebase_auth: ^6.7.0
   cloud_firestore: ^6.10.0
   flutter_riverpod: ^3.4.3
+  intl: ^0.20.3
 
 dev_dependencies:
   flutter_test:
@@ -60,6 +61,28 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  fonts:
+    # Nunito is split in two subsets: latin has ½ ¼ ¾, latin-ext has ₹.
+    # The theme uses NunitoExt as a fallback so every glyph resolves.
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-400.ttf
+        - asset: assets/fonts/Nunito-600.ttf
+          weight: 600
+        - asset: assets/fonts/Nunito-700.ttf
+          weight: 700
+        - asset: assets/fonts/Nunito-800.ttf
+          weight: 800
+    - family: NunitoExt
+      fonts:
+        - asset: assets/fonts/NunitoExt-400.ttf
+        - asset: assets/fonts/NunitoExt-600.ttf
+          weight: 600
+        - asset: assets/fonts/NunitoExt-700.ttf
+          weight: 700
+        - asset: assets/fonts/NunitoExt-800.ttf
+          weight: 800
 
   # To add assets to your application, add an assets section, like this:
   # assets:
