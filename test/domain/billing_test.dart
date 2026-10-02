@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:milk_tracker/domain/billing.dart';
+import 'package:milk_tracker/domain/dates.dart';
 import 'package:milk_tracker/domain/models.dart';
 
 DayEntry got(int day, int ml, int ratePaise, {int month = 10}) => DayEntry(
@@ -81,5 +82,17 @@ void main() {
       trackingSince: DateTime(2026, 10, 20, 15, 30),
     );
     expect(s.missingDays, [DateTime(2026, 10, 21), DateTime(2026, 10, 22)]);
+  });
+
+  test('daysBetween is inclusive and crosses months', () {
+    expect(daysBetween(DateTime(2026, 10, 30), DateTime(2026, 11, 2)), [
+      DateTime(2026, 10, 30),
+      DateTime(2026, 10, 31),
+      DateTime(2026, 11, 1),
+      DateTime(2026, 11, 2),
+    ]);
+    expect(daysBetween(DateTime(2026, 10, 3, 18), DateTime(2026, 10, 3)), [
+      DateTime(2026, 10, 3),
+    ]);
   });
 }

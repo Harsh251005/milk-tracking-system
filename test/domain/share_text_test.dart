@@ -162,4 +162,27 @@ Amount: ₹245''');
     expect(back.amount, isFalse);
     expect(back.dayList, isTrue);
   });
+
+  test('going away message, for a range and a single day', () {
+    expect(
+      awayMessage(
+        household: home,
+        from: DateTime(2026, 10, 3),
+        to: DateTime(2026, 10, 7),
+      ),
+      'Namaste Ramesh,\n'
+      "We will be away. Please don't send milk from Sat, 3 Oct to Wed, 7 Oct.\n"
+      'Please start again from Thu, 8 Oct.',
+    );
+    expect(
+      awayMessage(
+        household: home,
+        from: DateTime(2026, 10, 31),
+        to: DateTime(2026, 10, 31),
+      ),
+      contains(
+        "don't send milk on Sat, 31 Oct.\nPlease start again from Sun, 1 Nov.",
+      ),
+    );
+  });
 }

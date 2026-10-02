@@ -19,3 +19,17 @@ YearMonth addMonths(YearMonth m, int delta) {
   final d = DateTime(m.year, m.month + delta);
   return (year: d.year, month: d.month);
 }
+
+/// Every calendar day from [from] to [to], inclusive.
+List<DateTime> daysBetween(DateTime from, DateTime to) {
+  final start = dateOnly(from);
+  final end = dateOnly(to);
+  return [
+    for (
+      var d = start;
+      !d.isAfter(end);
+      d = DateTime(d.year, d.month, d.day + 1)
+    )
+      d,
+  ];
+}

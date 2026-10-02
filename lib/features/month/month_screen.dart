@@ -77,7 +77,8 @@ class _MonthScreenState extends ConsumerState<MonthScreen> {
       children: [
         _MonthSwitcher(
           month: _month,
-          canGoForward: !isCurrent,
+          // One month ahead, so "going away" days there can be seen and undone.
+          canGoForward: _month != addMonths(monthOf(today), 1),
           onPrevious: () => _changeMonth(-1),
           onNext: () => _changeMonth(1),
         ),

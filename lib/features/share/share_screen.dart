@@ -13,14 +13,17 @@ import '../../ui/widgets/section_card.dart';
 import '../../ui/widgets/status_views.dart';
 import 'send.dart';
 
-enum MessageKind { bill, today, tomorrow }
+enum MessageKind { bill, today, tomorrow, away }
 
 /// Builds a message for the milkman. The person chooses what goes in,
 /// can edit the text, and sends it themselves from WhatsApp.
 class ShareScreen extends ConsumerStatefulWidget {
-  const ShareScreen({super.key, required this.kind, this.month});
+  const ShareScreen({super.key, required this.kind, this.month, this.away});
 
   final MessageKind kind;
+
+  /// Days marked "going away"; required when [kind] is away.
+  final ({DateTime from, DateTime to})? away;
 
   /// Month for the bill; defaults to the current one.
   final YearMonth? month;
@@ -132,6 +135,11 @@ class _ShareScreenState extends ConsumerState<ShareScreen> {
         tomorrow: tomorrow,
         quantitiesMl: tomorrowQty,
       ),
+      MessageKind.away => awayMessage(
+        household: h,
+        from: widget.away!.from,
+        to: widget.away!.to,
+      ),
     };
     _sync(generated);
     final canSend = generated.isNotEmpty;
@@ -145,12 +153,21 @@ class _ShareScreenState extends ConsumerState<ShareScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
             children: [
-              _KindSelector(
-                selected: _kind,
-                onChanged: (k) => setState(() => _kind = k),
-              ),
+              if (_kind != MessageKind.away)
+                _KindSelector(
+                  selected: _kind,
+                  onChanged: (k) => setState(() => _kind = k),
+                ),
               const SizedBox(height: 16),
               switch (_kind) {
+                MessageKind.away => SectionCard(
+                  color: context.colors.skippedSoft,
+                  child: Text(
+                    'Those days are marked as no milk. Let the milkman '
+                    'know:',
+                    style: t.titleMedium,
+                  ),
+                ),
                 MessageKind.bill => _BillOptionsCard(
                   month: _month,
                   canGoForward: _month != monthOf(today),
@@ -279,6 +296,7 @@ class _KindSelector extends StatelessWidget {
     MessageKind.bill: 'Monthly bill',
     MessageKind.today: 'Today',
     MessageKind.tomorrow: 'Tomorrow',
+    MessageKind.away: 'Going away',
   };
 
   @override
@@ -286,7 +304,11 @@ class _KindSelector extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        for (final (i, kind) in MessageKind.values.indexed) ...[
+        for (final (i, kind) in [
+          MessageKind.bill,
+          MessageKind.today,
+          MessageKind.tomorrow,
+        ].indexed) ...[
           if (i > 0) const SizedBox(width: 8),
           Expanded(
             child: Material(

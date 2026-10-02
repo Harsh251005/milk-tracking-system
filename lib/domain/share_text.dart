@@ -193,3 +193,17 @@ String tomorrowMessage({
   return '${_greeting(household)}\n'
       'Please send ${_quantities(household, quantitiesMl)} milk $when.';
 }
+
+String awayMessage({
+  required Household household,
+  required DateTime from,
+  required DateTime to,
+}) {
+  final back = DateTime(to.year, to.month, to.day + 1);
+  final when = isSameDay(from, to)
+      ? 'on ${_dayLong(from)}'
+      : 'from ${_dayLong(from)} to ${_dayLong(to)}';
+  return '${_greeting(household)}\n'
+      "We will be away. Please don't send milk $when.\n"
+      'Please start again from ${_dayLong(back)}.';
+}

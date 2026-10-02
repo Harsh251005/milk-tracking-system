@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:milk_tracker/data/memory_milk_repository.dart';
+import 'package:milk_tracker/domain/models.dart';
 import 'package:milk_tracker/features/today/today_screen.dart';
 import 'package:milk_tracker/state/providers.dart';
 import 'package:milk_tracker/ui/theme.dart';
@@ -158,6 +159,21 @@ void main() {
     expect(find.text('Saturday'), findsOneWidget);
     expect(find.text('Got 1 L'), findsOneWidget);
     expect(find.text('1 L received'), findsNothing);
+  });
+
+  testWidgets('going away marks the chosen days as no milk', (tester) async {
+    await pumpToday(tester);
+    await tapOn(tester, find.text('Going away?'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('No milk on Sat, 3 Oct'), findsOneWidget);
+
+    await tapOn(tester, find.text('Only mark the days'));
+    await tester.pumpAndSettle();
+
+    final entries = await repo.watchMonth((year: 2026, month: 10)).first;
+    final tomorrow = entries.where((e) => e.date == DateTime(2026, 10, 3));
+    expect(tomorrow.single.status, DayStatus.skipped);
+    expect(tomorrow.single.byName, 'Mom');
   });
 }
 

@@ -131,7 +131,7 @@ class _DayCell extends StatelessWidget {
     final fg = selected ? scheme.onPrimary : scheme.onSurface;
 
     return Semantics(
-      button: !isFuture,
+      button: !isFuture || e != null,
       label: _semanticLabel(e),
       child: Material(
         color: bg,
@@ -143,8 +143,10 @@ class _DayCell extends StatelessWidget {
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: isFuture ? null : () => onTap(date),
-          onLongPress: isFuture ? null : () => onLongPress(date),
+          // Future days open only if something is planned on them
+          // (e.g. "going away"), so it can be undone.
+          onTap: isFuture && e == null ? null : () => onTap(date),
+          onLongPress: isFuture && e == null ? null : () => onLongPress(date),
           child: Padding(
             padding: const EdgeInsets.all(4),
             // Shrinks rather than overflows if text is larger than the cell.
