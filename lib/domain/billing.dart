@@ -17,7 +17,8 @@ class MonthSummary {
   final int gotDays;
   final int skippedDays;
 
-  /// Past days of the month (before [today]) with no entry at all.
+  /// Past days of the month (before [today], from [trackingSince]) with no
+  /// entry at all.
   final List<DateTime> missingDays;
 }
 
@@ -26,6 +27,7 @@ MonthSummary summarizeMonth({
   required YearMonth month,
   required Iterable<DayEntry> entries,
   required DateTime today,
+  DateTime? trackingSince,
 }) {
   final mlByProduct = <String, int>{};
   var paiseTimesMl = 0;
@@ -50,7 +52,11 @@ MonthSummary summarizeMonth({
   final todayOnly = dateOnly(today);
   final missing = <DateTime>[
     for (var day = 1; day <= daysInMonth(month.year, month.month); day++)
-      if (DateTime(month.year, month.month, day).isBefore(todayOnly) &&
+      if (isExpectedDay(
+            DateTime(month.year, month.month, day),
+            today: todayOnly,
+            trackingSince: trackingSince,
+          ) &&
           !logged.contains(dayKey(DateTime(month.year, month.month, day))))
         DateTime(month.year, month.month, day),
   ];
@@ -65,3 +71,12 @@ MonthSummary summarizeMonth({
     missingDays: missing,
   );
 }
+
+/// A past day on or after tracking started, so an empty one is "not logged".
+bool isExpectedDay(
+  DateTime day, {
+  required DateTime today,
+  DateTime? trackingSince,
+}) =>
+    day.isBefore(dateOnly(today)) &&
+    (trackingSince == null || !day.isBefore(dateOnly(trackingSince)));

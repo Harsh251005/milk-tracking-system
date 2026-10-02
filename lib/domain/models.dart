@@ -6,6 +6,10 @@ library;
 
 enum DayStatus { got, skipped }
 
+/// Time-based, so sorting ids gives creation order.
+String newProductId([DateTime? now]) =>
+    'p${(now ?? DateTime.now()).millisecondsSinceEpoch}';
+
 class Product {
   const Product({
     required this.id,
@@ -22,6 +26,13 @@ class Product {
 
   /// Quantity prefilled each morning.
   final int usualMl;
+
+  Product copyWith({String? name, int? ratePaise, int? usualMl}) => Product(
+    id: id,
+    name: name ?? this.name,
+    ratePaise: ratePaise ?? this.ratePaise,
+    usualMl: usualMl ?? this.usualMl,
+  );
 }
 
 class Household {
@@ -32,10 +43,15 @@ class Household {
     required this.members,
     this.milkmanName,
     this.milkmanPhone,
+    this.startedOn,
   });
 
   final String id;
   final String name;
+
+  /// Day the household was set up. Earlier days aren't flagged "not logged".
+  /// Null means no limit.
+  final DateTime? startedOn;
   final List<Product> products;
 
   /// uid -> display name ("Mom", "Dad").

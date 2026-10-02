@@ -72,4 +72,14 @@ void main() {
     );
     expect(s.totalMl, 1000);
   });
+
+  test('days before tracking started are not counted as missing', () {
+    final s = summarizeMonth(
+      month: oct,
+      entries: [got(20, 1000, 7000)],
+      today: DateTime(2026, 10, 23),
+      trackingSince: DateTime(2026, 10, 20, 15, 30),
+    );
+    expect(s.missingDays, [DateTime(2026, 10, 21), DateTime(2026, 10, 22)]);
+  });
 }
