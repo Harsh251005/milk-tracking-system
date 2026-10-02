@@ -8,8 +8,27 @@ Two phones in one household stay in sync.
 distribution via GitHub Releases — no Play Store.
 
 ## Status
-v0.7.0 (M7) — going away, daily reminder, app icon and splash.
-M6 — WhatsApp messages to the milkman. M5 — family sync. Phones in one household see and log the same days live.
+v1.0.0 — ready for the family. Daily logging, monthly bill, family sync,
+WhatsApp messages to the milkman, going away, reminders, Google backup and
+in-app updates.
+
+## Installing on a family phone
+1. On the phone, open the latest release:
+   https://github.com/Harsh251005/milk-tracking-system/releases/latest
+2. Download `milk-tracker-…-arm64-v8a.apk` (any phone from the last ~7 years;
+   very old phones need the `armeabi-v7a` one).
+3. Tap the download. Android asks to allow installing from the browser once —
+   allow it, then tap **Install**.
+4. Open **Milk Tracker**:
+   - **First person in the house:** enter your name, the milk and its price,
+     and the milkman's number.
+   - **Everyone else:** tap **Join their tracker** and scan the code shown on
+     the first phone under Settings → Family → Add a family member.
+5. Tap **Back up** on the card on Today so the log can be restored on a new
+   phone (welcome screen → **Restore with Google**).
+
+Updates: when a new version is published, Today shows **Update available**;
+tap it, then tap the download to install over the old version. Data stays. Phones in one household see and log the same days live.
 Each phone signs in anonymously (no login screen); logging works offline and
 syncs within seconds of reconnecting.
 
@@ -91,7 +110,19 @@ cd tool/rules-test && npm install && npm test   # free, runs locally
 ./tool/deploy_rules.sh                          # uses your gcloud login
 ```
 
-## Release (later milestones)
-`flutter build apk --release`, signed with a local keystore that is never
-committed (`android/key.properties`, `*.jks` are gitignored). Back the keystore
-up — losing it forces every phone to uninstall before updating.
+## Releasing an update
+1. Bump `version:` in `pubspec.yaml` (e.g. `1.0.1+4` — the number after `+`
+   must always go up).
+2. Write what changed in a notes file, commit everything, then:
+   `tool/release.sh notes.md` — runs the tests, builds one APK per phone type
+   and publishes a GitHub Release. Phones show the update banner next open.
+
+Release APKs are signed with a local keystore that is never committed
+(`android/key.properties`, `*.jks` are gitignored). **Back the keystore up** —
+losing it means every phone must uninstall (and restore from Google) to
+update. Its SHA-1 is registered with Firebase for Google sign-in.
+
+Release builds strip resources only referenced by name; anything like that
+must be listed in `android/app/src/main/res/raw/keep.xml`.
+
+`tool/wipe_data.py` deletes all Firebase data (dry run unless `--yes`).
