@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// Milk Tracker access rules.
+// - Each phone signs in anonymously and can only touch its own users/{uid}.
+// - A household is readable and writable only by its members.
+// - Anyone signed in may create a household, but only with themselves as the
+//   sole member. Joining an existing household by code arrives in M5.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isMember(householdId) {
+      return signedIn() && request.auth.uid in
+        get(/databases/$(database)/documents/households/$(householdId)).data.members;
+    }
+
+    match /users/{uid} {
+      allow read, write: if signedIn() && request.auth.uid == uid;
+    }
+
+    match /households/{householdId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.members;
+
+      allow create: if signedIn()
+        && request.resource.data.members.keys().hasOnly([request.auth.uid])
+        && request.auth.uid in request.resource.data.members
+        && request.resource.data.createdBy == request.auth.uid;
+
+      // Members may edit settings but can't remove themselves by accident
+      // or add other people (that needs the M5 join flow).
+      allow update: if signedIn()
+        && request.auth.uid in resource.data.members
+        && request.resource.data.members.keys().hasOnly(resource.data.members.keys());
+
+      allow delete: if false;
+
+      match /entries/{day} {
+        allow read, write: if isMember(householdId);
+      }
+
+      match /payments/{month} {
+        allow read, write: if isMember(householdId);
+      }
+    }
+  }
+}
