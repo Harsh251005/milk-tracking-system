@@ -15,3 +15,8 @@ const shareAppText =
     'Milk Tracker: log daily milk in one tap, see the monthly bill, and '
     'message the milkman on WhatsApp. Free, for Android.\n\n'
     'Download: $downloadLink';
+
+/// Caption sent with the app file itself (Settings → Share Milk Tracker).
+const shareAppCaption =
+    'Milk Tracker: log daily milk in one tap and see the monthly bill. '
+    'Tap the file to install.';

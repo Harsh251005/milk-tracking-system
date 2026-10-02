@@ -16,8 +16,9 @@ in-app updates.
 ## Installing on a family phone
 1. On the phone, open this link — it always downloads the newest version:
    https://github.com/Harsh251005/milk-tracking-system/releases/latest/download/milk-tracker-arm64-v8a.apk
-2. Or share it from a phone that has the app: Settings → **Share Milk
-   Tracker** sends the link on WhatsApp.
+2. Easiest: from a phone that already has the app, Settings → **Share Milk
+   Tracker** sends the app file itself on WhatsApp; the other person taps it
+   to install (no browser download — Chrome sometimes stalls on APKs).
 3. Tap the download. Android asks to allow installing from the browser once —
    allow it, then tap **Install**.
 4. Open **Milk Tracker**:

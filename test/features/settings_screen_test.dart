@@ -13,6 +13,7 @@ import '../helpers.dart';
 void main() {
   late MemoryMilkRepository repo;
   late FakeReminders reminders;
+  late FakeAppSharing sharing;
 
   Future<void> pumpSettings(
     WidgetTester tester, {
@@ -21,6 +22,7 @@ void main() {
     usePhoneScreen(tester);
     repo = MemoryMilkRepository.sample(today: DateTime(2026, 10, 2));
     reminders = FakeReminders(allowed: allowNotifications);
+    sharing = FakeAppSharing();
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -29,6 +31,7 @@ void main() {
           milkRepositoryProvider.overrideWithValue(repo),
           remindersProvider.overrideWithValue(reminders),
           todayProvider.overrideWithValue(DateTime(2026, 10, 2)),
+          appSharingProvider.overrideWithValue(sharing),
         ],
         child: MaterialApp(
           theme: buildTheme(),
@@ -132,10 +135,12 @@ void main() {
     expect(find.textContaining('Notifications are blocked'), findsOneWidget);
   });
 
-  testWidgets('Settings offers sharing the app', (tester) async {
+  testWidgets('Share Milk Tracker sends the app file', (tester) async {
     await pumpSettings(tester);
     await tester.scrollUntilVisible(find.text('Share Milk Tracker'), 300);
-    expect(find.text('Send the download link on WhatsApp'), findsOneWidget);
+    await tapOn(tester, find.text('Share Milk Tracker'));
+    await tester.pumpAndSettle();
+    expect(sharing.shared, ['1.0.0']);
   });
 
   testWidgets('a fresh install shows the reminder on', (tester) async {

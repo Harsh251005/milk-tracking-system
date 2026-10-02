@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:milk_tracker/data/account_repository.dart';
+import 'package:milk_tracker/data/app_sharing.dart';
 import 'package:milk_tracker/data/backup.dart';
 import 'package:milk_tracker/data/reminders.dart';
 import 'package:milk_tracker/data/updates.dart';
@@ -134,4 +135,11 @@ class FakeUpdates implements Updates {
     if (failWith != null) throw UpdateException(failWith!);
     installs++;
   }
+}
+
+class FakeAppSharing implements AppSharing {
+  final shared = <String>[];
+
+  @override
+  Future<void> shareApp({required String version}) async => shared.add(version);
 }

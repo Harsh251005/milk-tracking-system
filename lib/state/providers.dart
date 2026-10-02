@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/account_repository.dart';
+import '../data/app_sharing.dart';
 import '../data/backup.dart';
 import '../data/firebase/firebase_account_repository.dart';
 import '../data/firebase/firestore_milk_repository.dart';
@@ -91,3 +92,5 @@ final availableUpdateProvider = FutureProvider<AppRelease?>((ref) async {
   final installed = await ref.watch(installedVersionProvider.future);
   return updateFor(installed, await ref.watch(updatesProvider).latest());
 });
+
+final appSharingProvider = Provider<AppSharing>((ref) => ApkAppSharing());

@@ -117,9 +117,8 @@ class SettingsScreen extends ConsumerWidget {
             child: _Row(
               icon: Icons.ios_share_rounded,
               title: 'Share Milk Tracker',
-              subtitle: 'Send the download link on WhatsApp',
-              onTap: () =>
-                  SharePlus.instance.share(ShareParams(text: shareAppText)),
+              subtitle: 'Send the app on WhatsApp — they tap it to install',
+              onTap: () => _shareApp(context, ref),
             ),
           ),
           const VersionFooter(),
@@ -153,6 +152,25 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
       );
+
+  /// Sends the app file itself. If that fails, says why and falls back to
+  /// sharing the download link.
+  Future<void> _shareApp(BuildContext context, WidgetRef ref) async {
+    final version = ref.read(installedVersionProvider).value ?? '';
+    try {
+      await ref.read(appSharingProvider).shareApp(version: version);
+    } on Exception catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.error,
+          duration: const Duration(seconds: 8),
+          content: Text("Couldn't share the app file: $e\nSharing the link."),
+        ),
+      );
+      await SharePlus.instance.share(ShareParams(text: shareAppText));
+    }
+  }
 
   Future<void> _removeMember(
     BuildContext context,
