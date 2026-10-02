@@ -12,7 +12,28 @@
           "package_name": "com.harsh.milk_tracker"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1067484744229-mja07fmb3ijf9aetm2rpkcg5dq97mhcp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.harsh.milk_tracker",
+            "certificate_hash": "cd4eb7d8f6d69b452b361a9e194ff2c2469687a8"
+          }
+        },
+        {
+          "client_id": "1067484744229-pb1lnirdbaat4093qdfeniitrk7ueik1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.harsh.milk_tracker",
+            "certificate_hash": "b562eb0420eeca2dc1f54eb42256d09679fced18"
+          }
+        },
+        {
+          "client_id": "1067484744229-np5pt2mdg0h4aj0sptaet06v4tgef1nd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB-tByDypKPvQdnoT9tNWKF-ER9uI652rQ"
@@ -20,7 +41,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1067484744229-np5pt2mdg0h4aj0sptaet06v4tgef1nd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
