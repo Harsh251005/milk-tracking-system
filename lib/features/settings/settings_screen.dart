@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../domain/format.dart';
 import '../../domain/models.dart';
 import '../../domain/phone.dart';
 import '../../domain/reminder.dart';
+import '../../links.dart';
 import '../../state/providers.dart';
 import '../../state/reminder_providers.dart';
 import '../../ui/friendly_error.dart';
@@ -109,6 +111,17 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SectionLabel('Backup'),
           const SectionCard(padding: EdgeInsets.zero, child: _BackupRow()),
+          const SectionLabel('Share'),
+          SectionCard(
+            padding: EdgeInsets.zero,
+            child: _Row(
+              icon: Icons.ios_share_rounded,
+              title: 'Share Milk Tracker',
+              subtitle: 'Send the download link on WhatsApp',
+              onTap: () =>
+                  SharePlus.instance.share(ShareParams(text: shareAppText)),
+            ),
+          ),
           const VersionFooter(),
         ],
       ),

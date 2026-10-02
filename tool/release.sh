@@ -17,9 +17,11 @@ flutter build apk --release --split-per-abi
 
 mkdir -p build/release && rm -f build/release/*.apk
 # x86_64 is only for PC emulators; real phones are arm64 (most) or arm.
+# Names carry no version, so .../releases/latest/download/<name> is a
+# stable link to the newest APK (lib/links.dart shares it).
 for abi in arm64-v8a armeabi-v7a; do
   cp "build/app/outputs/flutter-apk/app-$abi-release.apk" \
-     "build/release/milk-tracker-v$V-$abi.apk"
+     "build/release/milk-tracker-$abi.apk"
 done
 
 gh release create "v$V" build/release/*.apk \

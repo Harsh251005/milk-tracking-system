@@ -4,10 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'features/intro/intro_screen.dart';
 import 'features/month/month_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/setup/setup_screen.dart';
 import 'features/today/today_screen.dart';
+import 'state/intro_provider.dart';
 import 'state/providers.dart';
 import 'state/reminder_providers.dart';
 import 'ui/friendly_error.dart';
@@ -48,8 +50,17 @@ class AppGate extends ConsumerWidget {
         builder: (_) => AsyncView(
           value: ref.watch(householdIdProvider),
           onRetry: () => ref.invalidate(householdIdProvider),
-          builder: (householdId) =>
-              householdId == null ? const SetupScreen() : const HomeShell(),
+          builder: (householdId) => householdId != null
+              ? const HomeShell()
+              : AsyncView(
+                  value: ref.watch(introSeenProvider),
+                  builder: (seen) => seen
+                      ? const SetupScreen()
+                      : IntroScreen(
+                          onDone: () =>
+                              ref.read(introSeenProvider.notifier).markSeen(),
+                        ),
+                ),
         ),
       ),
     );

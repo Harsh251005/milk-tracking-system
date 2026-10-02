@@ -8,15 +8,18 @@ Two phones in one household stay in sync.
 distribution via GitHub Releases — no Play Store.
 
 ## Status
-v1.0.0 — ready for the family. Daily logging, monthly bill, family sync,
+v1.0.1 — adds a first-launch intro, "Share Milk Tracker" and a one-tap
+download link. v1.0.0 — ready for the family. Daily logging, monthly bill, family sync,
 WhatsApp messages to the milkman, going away, reminders, Google backup and
 in-app updates.
 
 ## Installing on a family phone
-1. On the phone, open the latest release:
-   https://github.com/Harsh251005/milk-tracking-system/releases/latest
-2. Download `milk-tracker-…-arm64-v8a.apk` (any phone from the last ~7 years;
-   very old phones need the `armeabi-v7a` one).
+1. On the phone, open this link — it always downloads the newest version:
+   https://github.com/Harsh251005/milk-tracking-system/releases/latest/download/milk-tracker-arm64-v8a.apk
+   (Very old phones: pick `milk-tracker-armeabi-v7a.apk` on
+   https://github.com/Harsh251005/milk-tracking-system/releases/latest)
+2. Or share it from a phone that has the app: Settings → **Share Milk
+   Tracker** sends the link on WhatsApp.
 3. Tap the download. Android asks to allow installing from the browser once —
    allow it, then tap **Install**.
 4. Open **Milk Tracker**:

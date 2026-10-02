@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../domain/invite.dart';
+import '../../links.dart';
 import '../../state/providers.dart';
 import '../../ui/theme.dart';
 import '../../ui/widgets/section_card.dart';
@@ -128,7 +129,8 @@ class _InviteBody extends StatelessWidget {
               text:
                   'Join our milk tracker: open Milk Tracker, tap '
                   '"Join their tracker" and enter code '
-                  '${formatInviteCode(invite.code)}',
+                  '${formatInviteCode(invite.code)}\n\n'
+                  "Don't have the app yet? Download it: $downloadLink",
             ),
           ),
           icon: const Icon(Icons.share_rounded),

@@ -131,4 +131,10 @@ void main() {
     expect(reminders.settings.enabled, isFalse);
     expect(find.textContaining('Notifications are blocked'), findsOneWidget);
   });
+
+  testWidgets('Settings offers sharing the app', (tester) async {
+    await pumpSettings(tester);
+    await tester.scrollUntilVisible(find.text('Share Milk Tracker'), 300);
+    expect(find.text('Send the download link on WhatsApp'), findsOneWidget);
+  });
 }

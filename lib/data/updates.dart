@@ -5,10 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../domain/release.dart';
-
-/// Where new versions are published (public repo, so no key is needed).
-const _latestRelease =
-    'https://api.github.com/repos/Harsh251005/milk-tracking-system/releases/latest';
+import '../links.dart';
 
 abstract interface class Updates {
   Future<String> installedVersion();
@@ -27,7 +24,7 @@ class GitHubUpdates implements Updates {
     try {
       final res = await http
           .get(
-            Uri.parse(_latestRelease),
+            Uri.parse(latestReleaseApi),
             headers: {'Accept': 'application/vnd.github+json'},
           )
           .timeout(const Duration(seconds: 10));
