@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/billing.dart';
 import '../../domain/dates.dart';
 import '../../domain/format.dart';
 import '../../domain/models.dart';
@@ -18,8 +19,10 @@ class CalendarGrid extends StatelessWidget {
     required this.selected,
     required this.onTap,
     required this.onLongPress,
+    this.trackingSince,
   });
 
+  final DateTime? trackingSince;
   final YearMonth month;
   final DateTime today;
   final Map<String, DayEntry> entriesByDay;
@@ -68,6 +71,7 @@ class CalendarGrid extends StatelessWidget {
               _DayCell(
                 date: DateTime(month.year, month.month, d),
                 today: today,
+                trackingSince: trackingSince,
                 entry:
                     entriesByDay[dayKey(DateTime(month.year, month.month, d))],
                 selected: selected.contains(
@@ -87,6 +91,7 @@ class _DayCell extends StatelessWidget {
   const _DayCell({
     required this.date,
     required this.today,
+    required this.trackingSince,
     required this.entry,
     required this.selected,
     required this.onTap,
@@ -95,6 +100,7 @@ class _DayCell extends StatelessWidget {
 
   final DateTime date;
   final DateTime today;
+  final DateTime? trackingSince;
   final DayEntry? entry;
   final bool selected;
   final ValueChanged<DateTime> onTap;
@@ -113,7 +119,13 @@ class _DayCell extends StatelessWidget {
       _ when selected => (scheme.primary, e == null ? '' : _mainText(e)),
       DayStatus.got => (c.gotSoft, formatQty(e!.totalMl)),
       DayStatus.skipped => (c.skippedSoft, '—'),
-      null when isFuture || isToday => (Colors.transparent, ''),
+      null
+          when !isExpectedDay(
+            date,
+            today: today,
+            trackingSince: trackingSince,
+          ) =>
+        (Colors.transparent, ''),
       null => (c.missingSoft, ''),
     };
     final fg = selected ? scheme.onPrimary : scheme.onSurface;

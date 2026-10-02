@@ -67,6 +67,7 @@ class _MonthScreenState extends ConsumerState<MonthScreen> {
       month: _month,
       entries: entries,
       today: today,
+      trackingSince: household.startedOn,
     );
     final byDay = {for (final e in entries) dayKey(e.date): e};
     final isCurrent = _month == monthOf(today);
@@ -95,6 +96,7 @@ class _MonthScreenState extends ConsumerState<MonthScreen> {
                 child: CalendarGrid(
                   month: _month,
                   today: today,
+                  trackingSince: household.startedOn,
                   entriesByDay: byDay,
                   selected: _selected,
                   onTap: (day) {

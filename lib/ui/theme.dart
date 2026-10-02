@@ -142,6 +142,31 @@ ThemeData buildTheme() {
         ),
       ),
     ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      prefixIconConstraints: const BoxConstraints(),
+      suffixIconConstraints: const BoxConstraints(),
+      fillColor: AppColors.light.card,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+      hintStyle: text.bodyLarge?.copyWith(color: const Color(0xFFADA393)),
+      prefixStyle: text.bodyLarge?.copyWith(
+        color: _ink,
+        fontWeight: FontWeight.w700,
+      ),
+      suffixStyle: text.bodyMedium?.copyWith(color: AppColors.light.muted),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: AppColors.light.border, width: 1.5),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: AppColors.light.border, width: 1.5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: _primary, width: 2),
+      ),
+    ),
     bottomSheetTheme: const BottomSheetThemeData(
       backgroundColor: _background,
       showDragHandle: true,

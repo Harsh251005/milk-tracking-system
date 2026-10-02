@@ -29,10 +29,8 @@ class QuantityEditor extends StatelessWidget {
   final Map<String, int> ratesPaise;
   final ValueChanged<Map<String, int>> onRatesChanged;
 
-  void _set(String productId, int ml) {
-    HapticFeedback.selectionClick();
-    onChanged({...quantitiesMl, productId: ml.clamp(0, 20000)});
-  }
+  void _set(String productId, int ml) =>
+      onChanged({...quantitiesMl, productId: ml});
 
   @override
   Widget build(BuildContext context) {
@@ -50,14 +48,9 @@ class QuantityEditor extends StatelessWidget {
                 ],
               ),
             ),
-          _Stepper(
+          QuantityPicker(
             ml: quantitiesMl[p.id] ?? 0,
             onChanged: (ml) => _set(p.id, ml),
-          ),
-          const SizedBox(height: 12),
-          _QuickPicks(
-            selectedMl: quantitiesMl[p.id] ?? 0,
-            onPick: (ml) => _set(p.id, ml),
           ),
           const SizedBox(height: 8),
           _PriceLine(
@@ -66,6 +59,30 @@ class QuantityEditor extends StatelessWidget {
             onChanged: (paise) => onRatesChanged({...ratesPaise, p.id: paise}),
           ),
         ],
+      ],
+    );
+  }
+}
+
+/// − [1½ L] + with quick-pick chips underneath, for one quantity.
+class QuantityPicker extends StatelessWidget {
+  const QuantityPicker({super.key, required this.ml, required this.onChanged});
+
+  final int ml;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    void set(int v) {
+      HapticFeedback.selectionClick();
+      onChanged(v.clamp(0, 20000));
+    }
+
+    return Column(
+      children: [
+        _Stepper(ml: ml, onChanged: set),
+        const SizedBox(height: 12),
+        _QuickPicks(selectedMl: ml, onPick: set),
       ],
     );
   }

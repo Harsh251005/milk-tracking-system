@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../friendly_error.dart';
+
 class LoadingView extends StatelessWidget {
   const LoadingView({super.key});
 
@@ -35,14 +37,15 @@ class ErrorPanel extends StatelessWidget {
               Icon(Icons.error_rounded, size: 56, color: scheme.error),
               const SizedBox(height: 12),
               Text(
-                'Something went wrong',
+                friendlyError(error).message,
+                textAlign: TextAlign.center,
                 style: t.titleLarge?.copyWith(color: scheme.onErrorContainer),
               ),
               const SizedBox(height: 8),
               Text(
-                '$error',
+                friendlyError(error).detail,
                 textAlign: TextAlign.center,
-                style: t.bodyMedium?.copyWith(color: scheme.onErrorContainer),
+                style: t.bodySmall?.copyWith(color: scheme.onErrorContainer),
               ),
               if (onRetry != null) ...[
                 const SizedBox(height: 16),
@@ -61,15 +64,21 @@ class ErrorPanel extends StatelessWidget {
 
 /// Renders [value] with the shared loading and error views.
 class AsyncView<T> extends StatelessWidget {
-  const AsyncView({super.key, required this.value, required this.builder});
+  const AsyncView({
+    super.key,
+    required this.value,
+    required this.builder,
+    this.onRetry,
+  });
 
   final AsyncValue<T> value;
   final Widget Function(T data) builder;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) => value.when(
     data: builder,
     loading: () => const LoadingView(),
-    error: (e, _) => ErrorPanel(error: e),
+    error: (e, _) => ErrorPanel(error: e, onRetry: onRetry),
   );
 }

@@ -130,6 +130,7 @@ class _TodayBodyState extends ConsumerState<_TodayBody> {
       month: monthOf(widget.today),
       entries: widget.entries,
       today: widget.today,
+      trackingSince: widget.household.startedOn,
     );
 
     return ListView(

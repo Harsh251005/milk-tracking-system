@@ -6,12 +6,15 @@ import 'package:milk_tracker/features/today/today_screen.dart';
 import 'package:milk_tracker/state/providers.dart';
 import 'package:milk_tracker/ui/theme.dart';
 
+import '../helpers.dart';
+
 void main() {
   final today = DateTime(2026, 10, 2);
 
   late MemoryMilkRepository repo;
 
   Future<void> pumpToday(WidgetTester tester) async {
+    usePhoneScreen(tester);
     repo = MemoryMilkRepository.sample(today: today);
     await tester.pumpWidget(
       ProviderScope(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/format.dart';
+import 'forms.dart';
 
 /// Asks for a price per litre. Returns paise, or null if cancelled.
 Future<int?> showPriceInputDialog(
@@ -59,9 +60,10 @@ class _PriceInputDialogState extends State<_PriceInputDialog> {
         style: t.headlineMedium,
         onSubmitted: (_) => _submit(),
         decoration: InputDecoration(
-          prefixText: '₹ ',
-          prefixStyle: t.headlineMedium,
-          suffixText: 'per litre',
+          prefixIcon: const InputAffix('₹'),
+          prefixIconConstraints: const BoxConstraints(),
+          suffixIcon: const InputAffix('per litre', trailing: true),
+          suffixIconConstraints: const BoxConstraints(),
           errorText: _error,
           border: const OutlineInputBorder(),
         ),

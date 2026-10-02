@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/month/month_screen.dart';
 import 'features/settings/settings_screen.dart';
+import 'features/setup/setup_screen.dart';
 import 'features/today/today_screen.dart';
+import 'state/providers.dart';
+import 'ui/friendly_error.dart';
 import 'ui/theme.dart';
+import 'ui/widgets/status_views.dart';
 
 class MilkTrackerApp extends StatelessWidget {
   const MilkTrackerApp({super.key});
@@ -14,20 +21,73 @@ class MilkTrackerApp extends StatelessWidget {
       title: 'Milk Tracker',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
-      home: const HomeShell(),
+      home: const AppGate(),
     );
   }
 }
 
-class HomeShell extends StatefulWidget {
+/// Signs in, then shows first-run setup or the app.
+class AppGate extends ConsumerWidget {
+  const AppGate({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      body: AsyncView(
+        value: ref.watch(signedInUidProvider),
+        onRetry: () => ref.invalidate(signedInUidProvider),
+        builder: (_) => AsyncView(
+          value: ref.watch(householdIdProvider),
+          onRetry: () => ref.invalidate(householdIdProvider),
+          builder: (householdId) =>
+              householdId == null ? const SetupScreen() : const HomeShell(),
+        ),
+      ),
+    );
+  }
+}
+
+class HomeShell extends ConsumerStatefulWidget {
   const HomeShell({super.key});
 
   @override
-  State<HomeShell> createState() => _HomeShellState();
+  ConsumerState<HomeShell> createState() => _HomeShellState();
 }
 
-class _HomeShellState extends State<HomeShell> {
+class _HomeShellState extends ConsumerState<HomeShell> {
   int _tab = 0;
+  StreamSubscription<Object>? _writeErrors;
+
+  @override
+  void initState() {
+    super.initState();
+    // A save the server rejected must never fail silently.
+    _writeErrors = ref
+        .read(milkRepositoryProvider)
+        .writeErrors
+        .listen(_showWriteError);
+  }
+
+  @override
+  void dispose() {
+    _writeErrors?.cancel();
+    super.dispose();
+  }
+
+  void _showWriteError(Object error) {
+    if (!mounted) return;
+    final err = friendlyError(error);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          backgroundColor: Theme.of(context).colorScheme.error,
+          duration: const Duration(seconds: 15),
+          showCloseIcon: true,
+          content: Text("Couldn't save: ${err.message}\n${err.detail}"),
+        ),
+      );
+  }
 
   void _go(int tab) => setState(() => _tab = tab);
 
